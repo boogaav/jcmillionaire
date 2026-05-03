@@ -160,7 +160,25 @@ const About: React.FC = () => {
         {/* Episodes Section */}
         <section className="px-4 py-10 max-w-4xl mx-auto">
           <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Watch the Trailer!</h3>
-          <div className="grid grid-cols-4 gap-2">
+
+          {/* Mobile: featured + horizontal slider */}
+          <div className="md:hidden space-y-3">
+            <div>
+              <TweetEmbed tweetId={EPISODES[0].tweetId} className="w-full max-w-sm mx-auto" iframeHeight="480px" />
+              <p className="text-xs font-medium text-muted-foreground text-center mt-1">{EPISODES[0].title}</p>
+            </div>
+            <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4 scrollbar-hide">
+              {EPISODES.slice(1).map((ep) => (
+                <div key={ep.tweetId} className="snap-start shrink-0 w-[70%]">
+                  <TweetEmbed tweetId={ep.tweetId} className="w-full" iframeHeight="360px" />
+                  <p className="text-xs font-medium text-muted-foreground text-center mt-1">{ep.title}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Desktop: grid */}
+          <div className="hidden md:grid grid-cols-4 gap-2">
             {EPISODES.map((ep) => (
               <div key={ep.tweetId} className="space-y-1">
                 <TweetEmbed tweetId={ep.tweetId} className="w-full" iframeHeight="360px" />
@@ -181,7 +199,23 @@ const About: React.FC = () => {
         {/* Testimonials Section */}
         <section className="px-4 py-10 max-w-4xl mx-auto">
           <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">What People Say</h3>
-          <div className="grid grid-cols-3 gap-2">
+
+          {/* Mobile: featured + horizontal slider */}
+          <div className="md:hidden space-y-3">
+            <div>
+              <TweetEmbed tweetId={TESTIMONIAL_IDS[0]} className="w-full max-w-sm mx-auto" iframeHeight="320px" />
+            </div>
+            <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4 scrollbar-hide">
+              {TESTIMONIAL_IDS.slice(1).map((id) => (
+                <div key={id} className="snap-start shrink-0 w-[70%]">
+                  <TweetEmbed tweetId={id} className="w-full" iframeHeight="240px" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Desktop: grid */}
+          <div className="hidden md:grid grid-cols-3 gap-2">
             {TESTIMONIAL_IDS.slice(0, 3).map((id) => (
               <div key={id}>
                 <TweetEmbed tweetId={id} className="w-full" />
