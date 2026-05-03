@@ -67,6 +67,7 @@ const About: React.FC = () => {
   const { isVerified } = state;
   const [currentSlide, setCurrentSlide] = React.useState(0);
   const [currentEpisode, setCurrentEpisode] = React.useState(0);
+  const [currentTestimonial, setCurrentTestimonial] = React.useState(0);
   const [isDownloading, setIsDownloading] = React.useState(false);
   const testimonialsRef = useRef<HTMLDivElement>(null);
 
