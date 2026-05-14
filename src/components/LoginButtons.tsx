@@ -287,6 +287,23 @@ export const LoginButtons: React.FC<LoginButtonsProps> = ({ compact = false }) =
               )}
             </Button>
 
+            <Button
+              variant="gold"
+              size="xl"
+              className="w-full bg-[#0098EA] hover:bg-[#0086CC] text-white border-0"
+              onClick={handleTonLogin}
+              disabled={isTonLogging}
+            >
+              {isTonLogging ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  <TonIcon size={20} />
+                  Login with TON
+                </>
+              )}
+            </Button>
+
             <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-border" />
               <span className="text-xs text-muted-foreground">or</span>
