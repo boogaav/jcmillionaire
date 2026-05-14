@@ -2,14 +2,17 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useTonConnectUI } from '@tonconnect/ui-react';
 import { Button } from '@/components/ui/button';
 import { SolanaIcon } from '@/components/icons/SolanaIcon';
 import { WorldIdIcon } from '@/components/icons/WorldIdIcon';
+import { TonIcon } from '@/components/icons/TonIcon';
 import { UsernamePrompt } from '@/components/UsernamePrompt';
 import { useGame } from '@/contexts/GameContext';
 import { ChevronRight, Loader2, LogIn, X } from 'lucide-react';
 import { isPhantomAvailable, authenticateWithPhantom } from '@/lib/phantomWallet';
 import { isInWorldApp, authenticateWithWallet } from '@/lib/minikit';
+import { authenticateWithTon } from '@/lib/tonWallet';
 import { persistUser } from '@/lib/userService';
 import { linkPendingReferralToUser } from '@/hooks/useReferralTracking';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,11 +26,14 @@ export const LoginButtons: React.FC<LoginButtonsProps> = ({ compact = false }) =
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { dispatch } = useGame();
+  const [tonConnectUI] = useTonConnectUI();
   const [isOpen, setIsOpen] = useState(false);
   const [isSolanaLogging, setIsSolanaLogging] = useState(false);
   const [isWorldLogging, setIsWorldLogging] = useState(false);
+  const [isTonLogging, setIsTonLogging] = useState(false);
   const [showUsernamePrompt, setShowUsernamePrompt] = useState(false);
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+  const [pendingWalletType, setPendingWalletType] = useState<'solana' | 'ton'>('solana');
 
   const handleWorldLogin = async () => {
     setIsWorldLogging(true);
@@ -102,9 +108,10 @@ export const LoginButtons: React.FC<LoginButtonsProps> = ({ compact = false }) =
         await finishLogin(existingUser.username);
       } else {
         setPendingUserId(result.user.id);
+        setPendingWalletType('solana');
         localStorage.setItem('jc_wallet_address', userData.wallet_address);
         localStorage.setItem('jc_wallet_type', 'solana');
-        localStorage.setItem('jc_pending_user_data', JSON.stringify(userData));
+        localStorage.setItem('jc_pending_user_data', JSON.stringify({ ...userData, walletType: 'solana' }));
         setIsSolanaLogging(false);
         setIsOpen(false);
         setShowUsernamePrompt(true);
@@ -123,11 +130,12 @@ export const LoginButtons: React.FC<LoginButtonsProps> = ({ compact = false }) =
     const pendingData = localStorage.getItem('jc_pending_user_data');
     if (pendingData) {
       const userData = JSON.parse(pendingData);
+      const walletType: 'solana' | 'ton' = userData.walletType || 'solana';
       localStorage.removeItem('jc_pending_user_data');
       const userObj = {
         id: userData.id,
         verificationLevel: userData.verification_level as 'device' | 'orb',
-        nullifierHash: `solana_${userData.wallet_address}`,
+        nullifierHash: `${walletType}_${userData.wallet_address}`,
         createdAt: userData.created_at,
         username,
       };
@@ -143,16 +151,72 @@ export const LoginButtons: React.FC<LoginButtonsProps> = ({ compact = false }) =
     const pendingData = localStorage.getItem('jc_pending_user_data');
     if (pendingData) {
       const userData = JSON.parse(pendingData);
+      const walletType: 'solana' | 'ton' = userData.walletType || 'solana';
       localStorage.removeItem('jc_pending_user_data');
       const userObj = {
         id: userData.id,
         verificationLevel: userData.verification_level as 'device' | 'orb',
-        nullifierHash: `solana_${userData.wallet_address}`,
+        nullifierHash: `${walletType}_${userData.wallet_address}`,
         createdAt: userData.created_at,
       };
       persistUser(userObj);
       await linkPendingReferralToUser(userObj.id);
       dispatch({ type: 'SET_USER', payload: userObj });
+    }
+  };
+
+  const handleTonLogin = async () => {
+    setIsTonLogging(true);
+    try {
+      const result = await authenticateWithTon(tonConnectUI);
+      if (!result.success || !result.user) {
+        throw new Error(result.error || 'TON authentication failed');
+      }
+      const userData = {
+        id: result.user.id,
+        verification_level: result.user.verification_level,
+        wallet_address: result.user.wallet_address,
+        created_at: result.user.created_at,
+      };
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('username')
+        .eq('id', result.user.id)
+        .maybeSingle();
+
+      const finishLogin = async (username?: string) => {
+        localStorage.setItem('jc_wallet_address', userData.wallet_address);
+        localStorage.setItem('jc_wallet_type', 'ton');
+        const userObj = {
+          id: userData.id,
+          verificationLevel: userData.verification_level as 'device' | 'orb',
+          nullifierHash: `ton_${userData.wallet_address}`,
+          createdAt: userData.created_at,
+          username,
+        };
+        persistUser(userObj);
+        await linkPendingReferralToUser(userObj.id);
+        dispatch({ type: 'SET_USER', payload: userObj });
+        setIsOpen(false);
+      };
+
+      if (existingUser?.username) {
+        await finishLogin(existingUser.username);
+      } else {
+        setPendingUserId(result.user.id);
+        setPendingWalletType('ton');
+        localStorage.setItem('jc_wallet_address', userData.wallet_address);
+        localStorage.setItem('jc_wallet_type', 'ton');
+        localStorage.setItem('jc_pending_user_data', JSON.stringify({ ...userData, walletType: 'ton' }));
+        setIsTonLogging(false);
+        setIsOpen(false);
+        setShowUsernamePrompt(true);
+      }
+    } catch (error) {
+      console.error('TON login failed:', error);
+      toast.error(error instanceof Error ? error.message : 'TON login failed');
+    } finally {
+      setIsTonLogging(false);
     }
   };
 
@@ -219,6 +283,23 @@ export const LoginButtons: React.FC<LoginButtonsProps> = ({ compact = false }) =
                 <>
                   <SolanaIcon size={20} />
                   Login with Solana
+                </>
+              )}
+            </Button>
+
+            <Button
+              variant="gold"
+              size="xl"
+              className="w-full bg-[#0098EA] hover:bg-[#0086CC] text-white border-0"
+              onClick={handleTonLogin}
+              disabled={isTonLogging}
+            >
+              {isTonLogging ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  <TonIcon size={20} />
+                  Login with TON
                 </>
               )}
             </Button>
