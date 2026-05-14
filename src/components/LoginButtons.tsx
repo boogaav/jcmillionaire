@@ -2,14 +2,17 @@ import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useTonConnectUI } from '@tonconnect/ui-react';
 import { Button } from '@/components/ui/button';
 import { SolanaIcon } from '@/components/icons/SolanaIcon';
 import { WorldIdIcon } from '@/components/icons/WorldIdIcon';
+import { TonIcon } from '@/components/icons/TonIcon';
 import { UsernamePrompt } from '@/components/UsernamePrompt';
 import { useGame } from '@/contexts/GameContext';
 import { ChevronRight, Loader2, LogIn, X } from 'lucide-react';
 import { isPhantomAvailable, authenticateWithPhantom } from '@/lib/phantomWallet';
 import { isInWorldApp, authenticateWithWallet } from '@/lib/minikit';
+import { authenticateWithTon } from '@/lib/tonWallet';
 import { persistUser } from '@/lib/userService';
 import { linkPendingReferralToUser } from '@/hooks/useReferralTracking';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,11 +26,14 @@ export const LoginButtons: React.FC<LoginButtonsProps> = ({ compact = false }) =
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { dispatch } = useGame();
+  const [tonConnectUI] = useTonConnectUI();
   const [isOpen, setIsOpen] = useState(false);
   const [isSolanaLogging, setIsSolanaLogging] = useState(false);
   const [isWorldLogging, setIsWorldLogging] = useState(false);
+  const [isTonLogging, setIsTonLogging] = useState(false);
   const [showUsernamePrompt, setShowUsernamePrompt] = useState(false);
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+  const [pendingWalletType, setPendingWalletType] = useState<'solana' | 'ton'>('solana');
 
   const handleWorldLogin = async () => {
     setIsWorldLogging(true);
