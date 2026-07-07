@@ -21,15 +21,28 @@ import Admin from "./pages/Admin";
 import Analytics from "./pages/Analytics";
 import About from "./pages/About";
 import Live from "./pages/Live";
+import LiveBroadcast from "./pages/LiveBroadcast";
+import { useLocation } from "react-router-dom";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
   const { isLoading } = useGame();
+  const location = useLocation();
+  const isBroadcast = location.pathname.toLowerCase().startsWith('/live/broadcast');
 
   if (isLoading) {
     return <LoadingScreen />;
+  }
+
+  if (isBroadcast) {
+    return (
+      <Routes>
+        <Route path="/live/broadcast" element={<LiveBroadcast />} />
+        <Route path="/LIVE/broadcast" element={<LiveBroadcast />} />
+      </Routes>
+    );
   }
 
   return (
