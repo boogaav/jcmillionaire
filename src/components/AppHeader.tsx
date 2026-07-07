@@ -1,7 +1,7 @@
 import React from 'react';
 import { LogOut } from 'lucide-react';
 import { toast } from 'sonner';
-import { JackieIcon } from '@/components/icons/JackieIcon';
+
 import { LoginButtons } from '@/components/LoginButtons';
 import { Button } from '@/components/ui/button';
 import { useGame } from '@/contexts/GameContext';
@@ -35,7 +35,6 @@ const AppHeader: React.FC = () => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-md border-b border-border px-4 py-3">
       <div className="max-w-4xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <JackieIcon size={32} className="animate-float" />
           <span className="font-display font-bold text-foreground text-lg">Jackie Chain</span>
         </div>
 
