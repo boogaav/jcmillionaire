@@ -14,6 +14,7 @@ type Action =
   | 'start_session'
   | 'start_question'
   | 'reveal_answer'
+  | 'show_ladder'
   | 'next_question'
   | 'end_session';
 
