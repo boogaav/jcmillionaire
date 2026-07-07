@@ -60,13 +60,14 @@ const AppHeader: React.FC = () => {
             <LoginButtons compact />
           ) : (
             <Button
-              variant="ghost"
-              size="icon"
+              variant="outline"
+              size="sm"
               onClick={handleLogout}
-              className="text-destructive"
+              className="gap-2 border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
               aria-label="Log out"
             >
-              <LogOut className="w-5 h-5" />
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
             </Button>
           )}
         </div>
