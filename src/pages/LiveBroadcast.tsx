@@ -86,6 +86,43 @@ export default function LiveBroadcast() {
   const showReveal = session?.status === 'reveal';
   const showQuestion = session && currentQ && (session.status === 'question' || session.status === 'reveal');
 
+  const startQuestion = async () => {
+    if (!session) return toast.error('No active session');
+    const { error } = await supabase
+      .from('live_sessions')
+      .update({ status: 'question', current_question_started_at: new Date().toISOString() })
+      .eq('id', session.id);
+    if (error) toast.error(error.message);
+  };
+  const revealAnswer = async () => {
+    if (!session) return;
+    const { error } = await supabase.from('live_sessions').update({ status: 'reveal' }).eq('id', session.id);
+    if (error) toast.error(error.message);
+    else toast.success('Answer revealed');
+  };
+  const nextQuestion = async () => {
+    if (!session) return;
+    const nextIdx = session.current_question_index + 1;
+    if (nextIdx >= questions.length) {
+      await supabase.from('live_sessions').update({ status: 'finished' }).eq('id', session.id);
+      toast.success('Game finished');
+      return;
+    }
+    const { error } = await supabase
+      .from('live_sessions')
+      .update({
+        current_question_index: nextIdx,
+        status: 'question',
+        current_question_started_at: new Date().toISOString(),
+      })
+      .eq('id', session.id);
+    if (error) toast.error(error.message);
+  };
+  const hideControls = () => {
+    params.set('controls', '0');
+    setParams(params, { replace: true });
+  };
+
   return (
     <div
       className="fixed inset-0 w-screen h-screen flex flex-col justify-end overflow-hidden"
