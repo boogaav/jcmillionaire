@@ -11,6 +11,7 @@ import { DEFAULT_PRIZE_LADDER, formatJC } from '@/lib/constants';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Check, X, Trophy, Users, Eye, Play, SkipForward, Radio, Plus, Trash2 } from 'lucide-react';
+import { LoginButtons } from '@/components/LoginButtons';
 
 type SessionStatus = 'lobby' | 'question' | 'reveal' | 'ladder' | 'finished';
 type Role = 'admin' | 'guest' | 'spectator';
