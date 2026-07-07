@@ -20,6 +20,7 @@ import Leaderboard from "./pages/Leaderboard";
 import Admin from "./pages/Admin";
 import Analytics from "./pages/Analytics";
 import About from "./pages/About";
+import Live from "./pages/Live";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,8 @@ const AppContent = () => {
         <Route path="/admin" element={<Admin />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/welcome" element={<Verify />} />
+        <Route path="/live" element={<Live />} />
+        <Route path="/LIVE" element={<Live />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
