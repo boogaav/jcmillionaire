@@ -20,6 +20,7 @@ import Leaderboard from "./pages/Leaderboard";
 import Admin from "./pages/Admin";
 import Analytics from "./pages/Analytics";
 import About from "./pages/About";
+import Live from "./pages/Live";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
