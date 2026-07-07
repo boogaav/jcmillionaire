@@ -154,7 +154,7 @@ export default function LiveBroadcast() {
       )}
 
       {/* Waiting state */}
-      {!showQuestion && (
+      {!showQuestion && !showLadder && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div
             className="px-16 py-8 text-5xl font-black text-yellow-300 tracking-wider"
@@ -167,6 +167,66 @@ export default function LiveBroadcast() {
             }}
           >
             {session?.status === 'finished' ? 'GAME OVER' : 'STAND BY…'}
+          </div>
+        </div>
+      )}
+
+      {/* Prize ladder — shown between reveal and next question */}
+      {showLadder && (
+        <div className="absolute inset-0 flex items-center justify-center p-8">
+          <div
+            className="w-full max-w-2xl p-8 rounded-2xl"
+            style={{
+              background:
+                'linear-gradient(180deg, #0a1a3a 0%, #030818 55%, #0a1a3a 100%)',
+              border: '3px solid #f5c518',
+              boxShadow: '0 0 60px rgba(245,197,24,0.35)',
+            }}
+          >
+            <div className="flex items-center justify-center gap-3 mb-5 text-yellow-300">
+              <Trophy className="w-7 h-7" />
+              <h2 className="text-3xl font-black tracking-widest" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.9)' }}>
+                PRIZE LADDER
+              </h2>
+            </div>
+            <div className="flex flex-col-reverse gap-1.5">
+              {questions.map((q, idx) => {
+                const reached = session ? idx <= session.current_question_index : false;
+                const current = session ? idx === session.current_question_index : false;
+                return (
+                  <div
+                    key={q.id}
+                    className="flex items-center justify-between px-5 py-2.5 rounded-lg transition-all"
+                    style={{
+                      background: current
+                        ? 'linear-gradient(90deg, #f5c518 0%, #ffdb4a 100%)'
+                        : reached
+                        ? 'linear-gradient(90deg, #1a7a2e 0%, #0a3a15 100%)'
+                        : 'rgba(255,255,255,0.05)',
+                      border: current
+                        ? '2px solid #fff'
+                        : reached
+                        ? '1px solid rgba(74,222,128,0.5)'
+                        : '1px solid rgba(255,255,255,0.1)',
+                      boxShadow: current ? '0 0 30px rgba(245,197,24,0.7)' : undefined,
+                    }}
+                  >
+                    <span
+                      className={`font-bold text-lg ${current ? 'text-black' : reached ? 'text-white' : 'text-white/50'}`}
+                      style={{ textShadow: current ? 'none' : '0 1px 2px rgba(0,0,0,0.8)' }}
+                    >
+                      Q{q.order_index}
+                    </span>
+                    <span
+                      className={`font-black text-xl ${current ? 'text-black' : reached ? 'text-yellow-300' : 'text-white/40'}`}
+                      style={{ textShadow: current ? 'none' : '0 1px 2px rgba(0,0,0,0.8)' }}
+                    >
+                      {formatJC(q.prize_amount)} $JC
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
