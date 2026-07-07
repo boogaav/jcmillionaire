@@ -43,10 +43,21 @@ interface LiveQuestion {
 
 const CHOICES: Choice[] = ['A', 'B', 'C', 'D'];
 
+interface LiveParticipant {
+  id: string;
+  user_id: string;
+  display_name: string | null;
+  role: string;
+  current_ladder_amount: number;
+  is_eliminated: boolean;
+}
+
 export default function LiveBroadcast() {
   const [params, setParams] = useSearchParams();
   const bg = params.get('bg') || 'green';
   const showControls = params.get('controls') !== '0';
+  const showLadderPanel = params.get('panel_ladder') !== '0';
+  const showLeaderboardPanel = params.get('panel_lb') !== '0';
   const bgStyle: React.CSSProperties =
     bg === 'transparent'
       ? { background: 'transparent' }
@@ -58,6 +69,7 @@ export default function LiveBroadcast() {
   const adminUserId = state.user?.id;
   const [session, setSession] = useState<LiveSession | null>(null);
   const [questions, setQuestions] = useState<LiveQuestion[]>([]);
+  const [participants, setParticipants] = useState<LiveParticipant[]>([]);
 
   const load = async () => {
     const { data: sess } = await supabase
@@ -78,6 +90,15 @@ export default function LiveBroadcast() {
     } else {
       setQuestions([]);
     }
+    if (sess?.id) {
+      const { data: parts } = await supabase
+        .from('live_participants')
+        .select('id, user_id, display_name, role, current_ladder_amount, is_eliminated')
+        .eq('session_id', sess.id);
+      setParticipants((parts as LiveParticipant[]) || []);
+    } else {
+      setParticipants([]);
+    }
   };
 
   useEffect(() => {
@@ -86,11 +107,19 @@ export default function LiveBroadcast() {
       .channel('live-broadcast')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'live_sessions' }, () => load())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'live_questions' }, () => load())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_participants' }, () => load())
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  const togglePanel = (key: 'panel_ladder' | 'panel_lb') => {
+    const cur = params.get(key) !== '0';
+    if (cur) params.set(key, '0'); else params.delete(key);
+    setParams(params, { replace: true });
+  };
+
 
   const currentQ = session ? questions[session.current_question_index] : undefined;
   const showReveal = session?.status === 'reveal';
@@ -231,6 +260,114 @@ export default function LiveBroadcast() {
         </div>
       )}
 
+      {/* Side ladder panel — left of question */}
+      {session && showLadderPanel && questions.length > 0 && !showLadder && (
+        <div
+          className="fixed left-4 top-1/2 -translate-y-1/2 w-64 max-h-[90vh] overflow-y-auto p-3 rounded-xl"
+          style={{
+            background: 'linear-gradient(180deg, #0a1a3a 0%, #030818 100%)',
+            border: '2px solid #f5c518',
+            boxShadow: '0 0 30px rgba(245,197,24,0.25)',
+          }}
+        >
+          <div className="flex items-center justify-center gap-2 mb-2 text-yellow-300">
+            <Trophy className="w-4 h-4" />
+            <h3 className="text-xs font-black tracking-widest" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.9)' }}>
+              LADDER
+            </h3>
+          </div>
+          <div className="flex flex-col-reverse gap-1">
+            {questions.map((q, idx) => {
+              const reached = session ? idx < session.current_question_index : false;
+              const current = session ? idx === session.current_question_index : false;
+              return (
+                <div
+                  key={q.id}
+                  className="flex items-center justify-between px-2.5 py-1 rounded"
+                  style={{
+                    background: current
+                      ? 'linear-gradient(90deg, #f5c518 0%, #ffdb4a 100%)'
+                      : reached
+                      ? 'linear-gradient(90deg, #1a7a2e 0%, #0a3a15 100%)'
+                      : 'rgba(255,255,255,0.04)',
+                    border: current ? '1.5px solid #fff' : '1px solid rgba(255,255,255,0.08)',
+                    boxShadow: current ? '0 0 15px rgba(245,197,24,0.6)' : undefined,
+                  }}
+                >
+                  <span
+                    className={`font-bold text-xs ${current ? 'text-black' : reached ? 'text-white' : 'text-white/50'}`}
+                    style={{ textShadow: current ? 'none' : '0 1px 2px rgba(0,0,0,0.8)' }}
+                  >
+                    Q{q.order_index}
+                  </span>
+                  <span
+                    className={`font-black text-xs ${current ? 'text-black' : reached ? 'text-yellow-300' : 'text-white/40'}`}
+                    style={{ textShadow: current ? 'none' : '0 1px 2px rgba(0,0,0,0.8)' }}
+                  >
+                    {formatJC(q.prize_amount)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Side leaderboard panel — right of question */}
+      {session && showLeaderboardPanel && (
+        <div
+          className="fixed right-4 top-1/2 -translate-y-1/2 w-64 max-h-[90vh] overflow-y-auto p-3 rounded-xl"
+          style={{
+            background: 'linear-gradient(180deg, #0a1a3a 0%, #030818 100%)',
+            border: '2px solid #f5c518',
+            boxShadow: '0 0 30px rgba(245,197,24,0.25)',
+          }}
+        >
+          <div className="flex items-center justify-center gap-2 mb-2 text-yellow-300">
+            <Trophy className="w-4 h-4" />
+            <h3 className="text-xs font-black tracking-widest" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.9)' }}>
+              LEADERBOARD
+            </h3>
+          </div>
+          <div className="flex flex-col gap-1">
+            {[...participants]
+              .filter((p) => p.role === 'guest')
+              .sort((a, b) => b.current_ladder_amount - a.current_ladder_amount)
+              .slice(0, 10)
+              .map((p, i) => (
+                <div
+                  key={p.id}
+                  className="flex items-center justify-between px-2.5 py-1 rounded"
+                  style={{
+                    background: i === 0
+                      ? 'linear-gradient(90deg, #f5c518 0%, #ffdb4a 100%)'
+                      : 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    opacity: p.is_eliminated ? 0.4 : 1,
+                  }}
+                >
+                  <span
+                    className={`font-bold text-xs truncate max-w-[140px] ${i === 0 ? 'text-black' : 'text-white'}`}
+                    style={{ textShadow: i === 0 ? 'none' : '0 1px 2px rgba(0,0,0,0.8)' }}
+                  >
+                    #{i + 1} {p.display_name || p.user_id.slice(0, 6)}
+                  </span>
+                  <span
+                    className={`font-black text-xs ${i === 0 ? 'text-black' : 'text-yellow-300'}`}
+                    style={{ textShadow: i === 0 ? 'none' : '0 1px 2px rgba(0,0,0,0.8)' }}
+                  >
+                    {formatJC(p.current_ladder_amount)}
+                  </span>
+                </div>
+              ))}
+            {participants.filter((p) => p.role === 'guest').length === 0 && (
+              <p className="text-white/60 text-xs text-center py-2">No players yet</p>
+            )}
+          </div>
+        </div>
+      )}
+
+
       {/* Question banner + answers — bottom of screen */}
       {showQuestion && (
         <div className="pb-10 px-10 flex flex-col items-center gap-5">
@@ -347,6 +484,27 @@ export default function LiveBroadcast() {
                   {session.current_question_index + 1 >= questions.length ? 'Finish Game' : 'Next Question'}
                 </button>
               )}
+              <div className="pt-2 mt-1 border-t border-white/10 flex flex-col gap-1.5">
+                <div className="text-[10px] uppercase tracking-widest text-white/50">Panels</div>
+                <label className="flex items-center justify-between gap-2 text-xs text-white cursor-pointer">
+                  <span>Ladder (left)</span>
+                  <input
+                    type="checkbox"
+                    checked={showLadderPanel}
+                    onChange={() => togglePanel('panel_ladder')}
+                    className="accent-yellow-400"
+                  />
+                </label>
+                <label className="flex items-center justify-between gap-2 text-xs text-white cursor-pointer">
+                  <span>Leaderboard (right)</span>
+                  <input
+                    type="checkbox"
+                    checked={showLeaderboardPanel}
+                    onChange={() => togglePanel('panel_lb')}
+                    className="accent-yellow-400"
+                  />
+                </label>
+              </div>
             </div>
           )}
         </div>
