@@ -10,6 +10,15 @@ import { useGame } from '@/contexts/GameContext';
 import { toast } from 'sonner';
 import { Play, Check, SkipForward, EyeOff } from 'lucide-react';
 
+async function callLiveAdmin(adminUserId: string, action: string, extras: Record<string, unknown> = {}) {
+  const { data, error } = await supabase.functions.invoke('live-admin', {
+    body: { admin_user_id: adminUserId, action, ...extras },
+  });
+  if (error) throw new Error(error.message);
+  if (data?.error) throw new Error(data.error);
+  return data;
+}
+
 type SessionStatus = 'lobby' | 'question' | 'reveal' | 'finished';
 type Choice = 'A' | 'B' | 'C' | 'D';
 
