@@ -314,17 +314,12 @@ export default function LiveBroadcast() {
               <div className="text-xs text-white/70">
                 Q {Math.min(session.current_question_index + 1, questions.length)} / {questions.length}
               </div>
-              {(session.status === 'lobby' || session.status === 'reveal') && (
+              {session.status === 'lobby' && (
                 <button
-                  onClick={session.status === 'lobby' ? startQuestion : nextQuestion}
+                  onClick={startQuestion}
                   className="px-4 py-2 rounded-lg bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-sm flex items-center gap-2"
                 >
-                  {session.status === 'lobby' ? <Play className="w-4 h-4" /> : <SkipForward className="w-4 h-4" />}
-                  {session.status === 'lobby'
-                    ? 'Start First Question'
-                    : session.current_question_index + 1 >= questions.length
-                    ? 'Finish Game'
-                    : 'Next Question'}
+                  <Play className="w-4 h-4" /> Start First Question
                 </button>
               )}
               {session.status === 'question' && (
@@ -333,6 +328,23 @@ export default function LiveBroadcast() {
                   className="px-4 py-2 rounded-lg bg-green-500 hover:bg-green-400 text-black font-bold text-sm flex items-center gap-2"
                 >
                   <Check className="w-4 h-4" /> Reveal Answer
+                </button>
+              )}
+              {session.status === 'reveal' && (
+                <button
+                  onClick={showLadderScreen}
+                  className="px-4 py-2 rounded-lg bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-sm flex items-center gap-2"
+                >
+                  <Trophy className="w-4 h-4" /> Show Ladder
+                </button>
+              )}
+              {session.status === 'ladder' && (
+                <button
+                  onClick={nextQuestion}
+                  className="px-4 py-2 rounded-lg bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-sm flex items-center gap-2"
+                >
+                  <SkipForward className="w-4 h-4" />
+                  {session.current_question_index + 1 >= questions.length ? 'Finish Game' : 'Next Question'}
                 </button>
               )}
             </div>
