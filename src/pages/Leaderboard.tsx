@@ -13,8 +13,8 @@ import { MiniKit } from '@worldcoin/minikit-js';
 import { isInWorldApp } from '@/lib/minikit';
 import { toast } from 'sonner';
 
-// Airdrop date - April 3, 2026 at 9pm Vietnam time (UTC+7) = 14:00 UTC
-const AIRDROP_DATE = new Date('2026-03-31T14:00:00Z');
+// Airdrop date - August 1, 2026 at 6pm Vietnam time (UTC+7) = 11:00 UTC
+const AIRDROP_DATE = new Date('2026-08-01T11:00:00Z');
 
 function getTimeUntilAirdrop(): { days: number; hours: number; minutes: number; seconds: number } {
   const now = new Date();
