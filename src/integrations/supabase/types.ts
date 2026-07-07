@@ -269,6 +269,216 @@ export type Database = {
           },
         ]
       }
+      live_answers: {
+        Row: {
+          answered_at: string
+          choice: string
+          id: string
+          is_correct: boolean | null
+          question_id: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          answered_at?: string
+          choice: string
+          id?: string
+          is_correct?: boolean | null
+          question_id: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          answered_at?: string
+          choice?: string
+          id?: string
+          is_correct?: boolean | null
+          question_id?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "live_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "live_answers_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "live_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_participants: {
+        Row: {
+          current_ladder_amount: number
+          display_name: string | null
+          id: string
+          is_eliminated: boolean
+          joined_at: string
+          reached_index: number
+          role: string
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          current_ladder_amount?: number
+          display_name?: string | null
+          id?: string
+          is_eliminated?: boolean
+          joined_at?: string
+          reached_index?: number
+          role?: string
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          current_ladder_amount?: number
+          display_name?: string | null
+          id?: string
+          is_eliminated?: boolean
+          joined_at?: string
+          reached_index?: number
+          role?: string
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_participants_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "live_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_questions: {
+        Row: {
+          choice_a: string
+          choice_b: string
+          choice_c: string
+          choice_d: string
+          correct_choice: string
+          created_at: string
+          id: string
+          order_index: number
+          prize_amount: number
+          question: string
+          quiz_set_id: string
+        }
+        Insert: {
+          choice_a: string
+          choice_b: string
+          choice_c: string
+          choice_d: string
+          correct_choice: string
+          created_at?: string
+          id?: string
+          order_index: number
+          prize_amount?: number
+          question: string
+          quiz_set_id: string
+        }
+        Update: {
+          choice_a?: string
+          choice_b?: string
+          choice_c?: string
+          choice_d?: string
+          correct_choice?: string
+          created_at?: string
+          id?: string
+          order_index?: number
+          prize_amount?: number
+          question?: string
+          quiz_set_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_questions_quiz_set_id_fkey"
+            columns: ["quiz_set_id"]
+            isOneToOne: false
+            referencedRelation: "live_quiz_sets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_quiz_sets: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      live_sessions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          current_question_index: number
+          current_question_started_at: string | null
+          id: string
+          is_active: boolean
+          quiz_set_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          current_question_index?: number
+          current_question_started_at?: string | null
+          id?: string
+          is_active?: boolean
+          quiz_set_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          current_question_index?: number
+          current_question_started_at?: string | null
+          id?: string
+          is_active?: boolean
+          quiz_set_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_sessions_quiz_set_id_fkey"
+            columns: ["quiz_set_id"]
+            isOneToOne: false
+            referencedRelation: "live_quiz_sets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prize_ladder: {
         Row: {
           is_safe_haven: boolean
