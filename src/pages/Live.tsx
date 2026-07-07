@@ -186,26 +186,8 @@ export default function Live() {
     );
   }
 
-  // Role picker for signed-in non-admins
-  if (user && !isAdmin && chosenRole === null) {
-    return (
-      <div className="min-h-screen pt-6 pb-32 px-4 max-w-md mx-auto flex flex-col items-center gap-6">
-        <div className="flex items-center gap-2 text-primary">
-          <Radio className="w-6 h-6 animate-pulse" />
-          <h1 className="text-3xl font-display font-bold">LIVE</h1>
-        </div>
-        <p className="text-center text-muted-foreground">Choose how you want to join.</p>
-        <div className="grid grid-cols-1 gap-3 w-full">
-          <Button size="lg" className="gap-2" onClick={() => setChosenRole('guest')}>
-            <Play className="w-4 h-4" /> Play as Guest
-          </Button>
-          <Button size="lg" variant="secondary" className="gap-2" onClick={() => setChosenRole('spectator')}>
-            <Eye className="w-4 h-4" /> Watch as Spectator
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  // Signed-in non-admins default to Guest immediately (no forced role picker).
+
 
   return (
     <div className="min-h-screen pt-4 pb-32 px-4 max-w-2xl mx-auto">
@@ -391,6 +373,8 @@ function PlayerView({
           {me.is_eliminated && <Badge variant="destructive">Eliminated</Badge>}
         </Card>
       )}
+
+      <Leaderboard participants={participants} highlightUserId={userId} />
     </div>
   );
 }
