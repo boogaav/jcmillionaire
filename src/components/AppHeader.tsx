@@ -1,7 +1,7 @@
 import React from 'react';
 import { LogOut } from 'lucide-react';
 import { toast } from 'sonner';
-import { JackieIcon } from '@/components/icons/JackieIcon';
+
 import { LoginButtons } from '@/components/LoginButtons';
 import { Button } from '@/components/ui/button';
 import { useGame } from '@/contexts/GameContext';
