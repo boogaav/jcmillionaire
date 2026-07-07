@@ -1,0 +1,193 @@
+// Live broadcast overlay — TV-show style question banner for StreamYard compositing.
+// Route: /live/broadcast?bg=green|black|transparent
+// Subscribes to the active live session and renders ONLY the question + 4 choices
+// in "Who Wants to Be a Millionaire"-style hex banners. No app chrome.
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { formatJC } from '@/lib/constants';
+
+type SessionStatus = 'lobby' | 'question' | 'reveal' | 'finished';
+type Choice = 'A' | 'B' | 'C' | 'D';
+
+interface LiveSession {
+  id: string;
+  quiz_set_id: string | null;
+  status: SessionStatus;
+  current_question_index: number;
+  is_active: boolean;
+}
+interface LiveQuestion {
+  id: string;
+  order_index: number;
+  question: string;
+  choice_a: string;
+  choice_b: string;
+  choice_c: string;
+  choice_d: string;
+  correct_choice: Choice;
+  prize_amount: number;
+}
+
+const CHOICES: Choice[] = ['A', 'B', 'C', 'D'];
+
+export default function LiveBroadcast() {
+  const [params] = useSearchParams();
+  const bg = params.get('bg') || 'green';
+  const bgStyle: React.CSSProperties =
+    bg === 'transparent'
+      ? { background: 'transparent' }
+      : bg === 'black'
+      ? { background: '#000' }
+      : { background: '#00b140' }; // chroma-key green
+
+  const [session, setSession] = useState<LiveSession | null>(null);
+  const [questions, setQuestions] = useState<LiveQuestion[]>([]);
+
+  const load = async () => {
+    const { data: sess } = await supabase
+      .from('live_sessions')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    setSession(sess as LiveSession | null);
+    if (sess?.quiz_set_id) {
+      const { data: qs } = await supabase
+        .from('live_questions')
+        .select('*')
+        .eq('quiz_set_id', sess.quiz_set_id)
+        .order('order_index', { ascending: true });
+      setQuestions((qs as LiveQuestion[]) || []);
+    } else {
+      setQuestions([]);
+    }
+  };
+
+  useEffect(() => {
+    load();
+    const channel = supabase
+      .channel('live-broadcast')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_sessions' }, () => load())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_questions' }, () => load())
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const currentQ = session ? questions[session.current_question_index] : undefined;
+  const showReveal = session?.status === 'reveal';
+  const showQuestion = session && currentQ && (session.status === 'question' || session.status === 'reveal');
+
+  return (
+    <div
+      className="fixed inset-0 w-screen h-screen flex flex-col justify-end overflow-hidden"
+      style={bgStyle}
+    >
+      {/* Prize badge — top center */}
+      {showQuestion && (
+        <div className="absolute top-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+          <div className="text-yellow-300 text-2xl font-bold tracking-widest drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+            QUESTION {(currentQ.order_index)}
+          </div>
+          <div
+            className="px-8 py-3 text-4xl font-black text-yellow-300"
+            style={{
+              background: 'linear-gradient(180deg, #0a1a3a 0%, #050c22 100%)',
+              clipPath:
+                'polygon(6% 0, 94% 0, 100% 50%, 94% 100%, 6% 100%, 0 50%)',
+              border: '2px solid #f5c518',
+              textShadow: '0 2px 4px rgba(0,0,0,0.9)',
+            }}
+          >
+            {formatJC(currentQ.prize_amount)}
+          </div>
+        </div>
+      )}
+
+      {/* Waiting state */}
+      {!showQuestion && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div
+            className="px-16 py-8 text-5xl font-black text-yellow-300 tracking-wider"
+            style={{
+              background: 'linear-gradient(180deg, #0a1a3a 0%, #050c22 100%)',
+              clipPath:
+                'polygon(4% 0, 96% 0, 100% 50%, 96% 100%, 4% 100%, 0 50%)',
+              border: '3px solid #f5c518',
+              textShadow: '0 2px 6px rgba(0,0,0,0.9)',
+            }}
+          >
+            {session?.status === 'finished' ? 'GAME OVER' : 'STAND BY…'}
+          </div>
+        </div>
+      )}
+
+      {/* Question banner + answers — bottom of screen */}
+      {showQuestion && (
+        <div className="pb-10 px-10 flex flex-col items-center gap-5">
+          {/* Question banner */}
+          <div
+            className="w-full max-w-6xl px-16 py-8 text-center"
+            style={{
+              background:
+                'linear-gradient(180deg, #0a1a3a 0%, #030818 55%, #0a1a3a 100%)',
+              clipPath:
+                'polygon(3% 0, 97% 0, 100% 50%, 97% 100%, 3% 100%, 0 50%)',
+              border: '2px solid rgba(255,255,255,0.15)',
+            }}
+          >
+            <div
+              className="text-white text-3xl md:text-4xl font-bold leading-snug"
+              style={{ textShadow: '0 2px 6px rgba(0,0,0,0.9)' }}
+            >
+              {currentQ.question}
+            </div>
+          </div>
+
+          {/* 4 choices — 2x2 grid */}
+          <div className="w-full max-w-6xl grid grid-cols-2 gap-x-8 gap-y-4">
+            {CHOICES.map((letter) => {
+              const text = currentQ[
+                `choice_${letter.toLowerCase()}` as 'choice_a'
+              ] as string;
+              const isCorrect = showReveal && currentQ.correct_choice === letter;
+              return (
+                <div
+                  key={letter}
+                  className="px-10 py-5 flex items-center gap-4 transition-all duration-300"
+                  style={{
+                    background: isCorrect
+                      ? 'linear-gradient(180deg, #1a7a2e 0%, #0a3a15 100%)'
+                      : 'linear-gradient(180deg, #0a1a3a 0%, #050c22 100%)',
+                    clipPath:
+                      'polygon(4% 0, 96% 0, 100% 50%, 96% 100%, 4% 100%, 0 50%)',
+                    border: isCorrect
+                      ? '2px solid #4ade80'
+                      : '2px solid rgba(255,255,255,0.15)',
+                    boxShadow: isCorrect ? '0 0 40px rgba(74,222,128,0.6)' : undefined,
+                  }}
+                >
+                  <span
+                    className="text-yellow-300 font-black text-2xl md:text-3xl"
+                    style={{ textShadow: '0 2px 4px rgba(0,0,0,0.9)' }}
+                  >
+                    {letter}:
+                  </span>
+                  <span
+                    className="text-white font-bold text-xl md:text-2xl"
+                    style={{ textShadow: '0 2px 4px rgba(0,0,0,0.9)' }}
+                  >
+                    {text}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
