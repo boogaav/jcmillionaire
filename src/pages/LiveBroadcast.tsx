@@ -43,10 +43,21 @@ interface LiveQuestion {
 
 const CHOICES: Choice[] = ['A', 'B', 'C', 'D'];
 
+interface LiveParticipant {
+  id: string;
+  user_id: string;
+  display_name: string | null;
+  role: string;
+  current_ladder_amount: number;
+  is_eliminated: boolean;
+}
+
 export default function LiveBroadcast() {
   const [params, setParams] = useSearchParams();
   const bg = params.get('bg') || 'green';
   const showControls = params.get('controls') !== '0';
+  const showLadderPanel = params.get('panel_ladder') !== '0';
+  const showLeaderboardPanel = params.get('panel_lb') !== '0';
   const bgStyle: React.CSSProperties =
     bg === 'transparent'
       ? { background: 'transparent' }
@@ -58,6 +69,7 @@ export default function LiveBroadcast() {
   const adminUserId = state.user?.id;
   const [session, setSession] = useState<LiveSession | null>(null);
   const [questions, setQuestions] = useState<LiveQuestion[]>([]);
+  const [participants, setParticipants] = useState<LiveParticipant[]>([]);
 
   const load = async () => {
     const { data: sess } = await supabase
@@ -78,6 +90,15 @@ export default function LiveBroadcast() {
     } else {
       setQuestions([]);
     }
+    if (sess?.id) {
+      const { data: parts } = await supabase
+        .from('live_participants')
+        .select('id, user_id, display_name, role, current_ladder_amount, is_eliminated')
+        .eq('session_id', sess.id);
+      setParticipants((parts as LiveParticipant[]) || []);
+    } else {
+      setParticipants([]);
+    }
   };
 
   useEffect(() => {
@@ -86,11 +107,19 @@ export default function LiveBroadcast() {
       .channel('live-broadcast')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'live_sessions' }, () => load())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'live_questions' }, () => load())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_participants' }, () => load())
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  const togglePanel = (key: 'panel_ladder' | 'panel_lb') => {
+    const cur = params.get(key) !== '0';
+    if (cur) params.set(key, '0'); else params.delete(key);
+    setParams(params, { replace: true });
+  };
+
 
   const currentQ = session ? questions[session.current_question_index] : undefined;
   const showReveal = session?.status === 'reveal';
