@@ -218,6 +218,7 @@ export default function Live() {
           answers={answers}
           quizSets={quizSets}
           reload={loadAll}
+          adminUserId={user?.id || ''}
         />
       ) : (
         <PlayerView
