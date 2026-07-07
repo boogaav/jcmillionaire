@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Check, X, Trophy, Users, Eye, Play, SkipForward, Radio, Plus, Trash2 } from 'lucide-react';
 
-type SessionStatus = 'lobby' | 'question' | 'reveal' | 'finished';
+type SessionStatus = 'lobby' | 'question' | 'reveal' | 'ladder' | 'finished';
 type Role = 'admin' | 'guest' | 'spectator';
 
 interface LiveSession {
