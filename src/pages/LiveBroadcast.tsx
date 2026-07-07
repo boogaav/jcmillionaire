@@ -98,35 +98,23 @@ export default function LiveBroadcast() {
 
   const startQuestion = async () => {
     if (!session) return toast.error('No active session');
-    const { error } = await supabase
-      .from('live_sessions')
-      .update({ status: 'question', current_question_started_at: new Date().toISOString() })
-      .eq('id', session.id);
-    if (error) toast.error(error.message);
+    if (!adminUserId) return toast.error('Sign in as admin');
+    try { await callLiveAdmin(adminUserId, 'start_question', { session_id: session.id }); }
+    catch (e) { toast.error((e as Error).message); }
   };
   const revealAnswer = async () => {
-    if (!session) return;
-    const { error } = await supabase.from('live_sessions').update({ status: 'reveal' }).eq('id', session.id);
-    if (error) toast.error(error.message);
-    else toast.success('Answer revealed');
+    if (!session || !adminUserId) return;
+    try {
+      await callLiveAdmin(adminUserId, 'reveal_answer', { session_id: session.id });
+      toast.success('Answer revealed');
+    } catch (e) { toast.error((e as Error).message); }
   };
   const nextQuestion = async () => {
-    if (!session) return;
-    const nextIdx = session.current_question_index + 1;
-    if (nextIdx >= questions.length) {
-      await supabase.from('live_sessions').update({ status: 'finished' }).eq('id', session.id);
-      toast.success('Game finished');
-      return;
-    }
-    const { error } = await supabase
-      .from('live_sessions')
-      .update({
-        current_question_index: nextIdx,
-        status: 'question',
-        current_question_started_at: new Date().toISOString(),
-      })
-      .eq('id', session.id);
-    if (error) toast.error(error.message);
+    if (!session || !adminUserId) return;
+    try {
+      const res = await callLiveAdmin(adminUserId, 'next_question', { session_id: session.id });
+      if (res?.finished) toast.success('Game finished');
+    } catch (e) { toast.error((e as Error).message); }
   };
   const hideControls = () => {
     params.set('controls', '0');
