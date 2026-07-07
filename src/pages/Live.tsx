@@ -373,6 +373,8 @@ function PlayerView({
           {me.is_eliminated && <Badge variant="destructive">Eliminated</Badge>}
         </Card>
       )}
+
+      <Leaderboard participants={participants} highlightUserId={userId} />
     </div>
   );
 }
