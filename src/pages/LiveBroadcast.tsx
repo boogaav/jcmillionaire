@@ -6,6 +6,9 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { formatJC } from '@/lib/constants';
+import { useGame } from '@/contexts/GameContext';
+import { toast } from 'sonner';
+import { Play, Check, SkipForward, EyeOff } from 'lucide-react';
 
 type SessionStatus = 'lobby' | 'question' | 'reveal' | 'finished';
 type Choice = 'A' | 'B' | 'C' | 'D';
@@ -32,8 +35,9 @@ interface LiveQuestion {
 const CHOICES: Choice[] = ['A', 'B', 'C', 'D'];
 
 export default function LiveBroadcast() {
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const bg = params.get('bg') || 'green';
+  const showControls = params.get('controls') !== '0';
   const bgStyle: React.CSSProperties =
     bg === 'transparent'
       ? { background: 'transparent' }
@@ -41,6 +45,7 @@ export default function LiveBroadcast() {
       ? { background: '#000' }
       : { background: '#00b140' }; // chroma-key green
 
+  const { isAdmin } = useGame();
   const [session, setSession] = useState<LiveSession | null>(null);
   const [questions, setQuestions] = useState<LiveQuestion[]>([]);
 
@@ -80,6 +85,43 @@ export default function LiveBroadcast() {
   const currentQ = session ? questions[session.current_question_index] : undefined;
   const showReveal = session?.status === 'reveal';
   const showQuestion = session && currentQ && (session.status === 'question' || session.status === 'reveal');
+
+  const startQuestion = async () => {
+    if (!session) return toast.error('No active session');
+    const { error } = await supabase
+      .from('live_sessions')
+      .update({ status: 'question', current_question_started_at: new Date().toISOString() })
+      .eq('id', session.id);
+    if (error) toast.error(error.message);
+  };
+  const revealAnswer = async () => {
+    if (!session) return;
+    const { error } = await supabase.from('live_sessions').update({ status: 'reveal' }).eq('id', session.id);
+    if (error) toast.error(error.message);
+    else toast.success('Answer revealed');
+  };
+  const nextQuestion = async () => {
+    if (!session) return;
+    const nextIdx = session.current_question_index + 1;
+    if (nextIdx >= questions.length) {
+      await supabase.from('live_sessions').update({ status: 'finished' }).eq('id', session.id);
+      toast.success('Game finished');
+      return;
+    }
+    const { error } = await supabase
+      .from('live_sessions')
+      .update({
+        current_question_index: nextIdx,
+        status: 'question',
+        current_question_started_at: new Date().toISOString(),
+      })
+      .eq('id', session.id);
+    if (error) toast.error(error.message);
+  };
+  const hideControls = () => {
+    params.set('controls', '0');
+    setParams(params, { replace: true });
+  };
 
   return (
     <div
@@ -186,6 +228,51 @@ export default function LiveBroadcast() {
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* Admin control panel — only visible to admins, hidden with ?controls=0 */}
+      {isAdmin && showControls && (
+        <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 p-3 rounded-xl bg-black/80 border border-white/20 backdrop-blur-sm shadow-2xl">
+          <div className="text-[10px] uppercase tracking-widest text-yellow-300 font-bold flex items-center justify-between gap-3">
+            <span>Admin · {session?.status || 'no session'}</span>
+            <button onClick={hideControls} title="Hide controls" className="text-white/60 hover:text-white">
+              <EyeOff className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          {!session && (
+            <div className="text-xs text-white/70 max-w-[220px]">
+              No active session. Start one from the /live page.
+            </div>
+          )}
+          {session && (
+            <div className="flex flex-col gap-2">
+              <div className="text-xs text-white/70">
+                Q {Math.min(session.current_question_index + 1, questions.length)} / {questions.length}
+              </div>
+              {(session.status === 'lobby' || session.status === 'reveal') && (
+                <button
+                  onClick={session.status === 'lobby' ? startQuestion : nextQuestion}
+                  className="px-4 py-2 rounded-lg bg-yellow-400 hover:bg-yellow-300 text-black font-bold text-sm flex items-center gap-2"
+                >
+                  {session.status === 'lobby' ? <Play className="w-4 h-4" /> : <SkipForward className="w-4 h-4" />}
+                  {session.status === 'lobby'
+                    ? 'Start First Question'
+                    : session.current_question_index + 1 >= questions.length
+                    ? 'Finish Game'
+                    : 'Next Question'}
+                </button>
+              )}
+              {session.status === 'question' && (
+                <button
+                  onClick={revealAnswer}
+                  className="px-4 py-2 rounded-lg bg-green-500 hover:bg-green-400 text-black font-bold text-sm flex items-center gap-2"
+                >
+                  <Check className="w-4 h-4" /> Reveal Answer
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
