@@ -54,7 +54,8 @@ export default function LiveBroadcast() {
       ? { background: '#000' }
       : { background: '#00b140' }; // chroma-key green
 
-  const { isAdmin } = useGame();
+  const { isAdmin, state } = useGame();
+  const adminUserId = state.user?.id;
   const [session, setSession] = useState<LiveSession | null>(null);
   const [questions, setQuestions] = useState<LiveQuestion[]>([]);
 
