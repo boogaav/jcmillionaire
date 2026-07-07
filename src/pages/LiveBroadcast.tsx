@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { formatJC } from '@/lib/constants';
 import { useGame } from '@/contexts/GameContext';
 import { toast } from 'sonner';
-import { Play, Check, SkipForward, EyeOff } from 'lucide-react';
+import { Play, Check, SkipForward, EyeOff, Trophy } from 'lucide-react';
 
 async function callLiveAdmin(adminUserId: string, action: string, extras: Record<string, unknown> = {}) {
   const { data, error } = await supabase.functions.invoke('live-admin', {
@@ -19,7 +19,7 @@ async function callLiveAdmin(adminUserId: string, action: string, extras: Record
   return data;
 }
 
-type SessionStatus = 'lobby' | 'question' | 'reveal' | 'finished';
+type SessionStatus = 'lobby' | 'question' | 'reveal' | 'ladder' | 'finished';
 type Choice = 'A' | 'B' | 'C' | 'D';
 
 interface LiveSession {
