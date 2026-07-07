@@ -29,9 +29,20 @@ const queryClient = new QueryClient();
 
 const AppContent = () => {
   const { isLoading } = useGame();
+  const location = useLocation();
+  const isBroadcast = location.pathname.toLowerCase().startsWith('/live/broadcast');
 
   if (isLoading) {
     return <LoadingScreen />;
+  }
+
+  if (isBroadcast) {
+    return (
+      <Routes>
+        <Route path="/live/broadcast" element={<LiveBroadcast />} />
+        <Route path="/LIVE/broadcast" element={<LiveBroadcast />} />
+      </Routes>
+    );
   }
 
   return (
