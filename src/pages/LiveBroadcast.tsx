@@ -260,6 +260,114 @@ export default function LiveBroadcast() {
         </div>
       )}
 
+      {/* Side ladder panel — left of question */}
+      {session && showLadderPanel && questions.length > 0 && !showLadder && (
+        <div
+          className="fixed left-4 top-1/2 -translate-y-1/2 w-64 max-h-[90vh] overflow-y-auto p-3 rounded-xl"
+          style={{
+            background: 'linear-gradient(180deg, #0a1a3a 0%, #030818 100%)',
+            border: '2px solid #f5c518',
+            boxShadow: '0 0 30px rgba(245,197,24,0.25)',
+          }}
+        >
+          <div className="flex items-center justify-center gap-2 mb-2 text-yellow-300">
+            <Trophy className="w-4 h-4" />
+            <h3 className="text-xs font-black tracking-widest" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.9)' }}>
+              LADDER
+            </h3>
+          </div>
+          <div className="flex flex-col-reverse gap-1">
+            {questions.map((q, idx) => {
+              const reached = session ? idx < session.current_question_index : false;
+              const current = session ? idx === session.current_question_index : false;
+              return (
+                <div
+                  key={q.id}
+                  className="flex items-center justify-between px-2.5 py-1 rounded"
+                  style={{
+                    background: current
+                      ? 'linear-gradient(90deg, #f5c518 0%, #ffdb4a 100%)'
+                      : reached
+                      ? 'linear-gradient(90deg, #1a7a2e 0%, #0a3a15 100%)'
+                      : 'rgba(255,255,255,0.04)',
+                    border: current ? '1.5px solid #fff' : '1px solid rgba(255,255,255,0.08)',
+                    boxShadow: current ? '0 0 15px rgba(245,197,24,0.6)' : undefined,
+                  }}
+                >
+                  <span
+                    className={`font-bold text-xs ${current ? 'text-black' : reached ? 'text-white' : 'text-white/50'}`}
+                    style={{ textShadow: current ? 'none' : '0 1px 2px rgba(0,0,0,0.8)' }}
+                  >
+                    Q{q.order_index}
+                  </span>
+                  <span
+                    className={`font-black text-xs ${current ? 'text-black' : reached ? 'text-yellow-300' : 'text-white/40'}`}
+                    style={{ textShadow: current ? 'none' : '0 1px 2px rgba(0,0,0,0.8)' }}
+                  >
+                    {formatJC(q.prize_amount)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Side leaderboard panel — right of question */}
+      {session && showLeaderboardPanel && (
+        <div
+          className="fixed right-4 top-1/2 -translate-y-1/2 w-64 max-h-[90vh] overflow-y-auto p-3 rounded-xl"
+          style={{
+            background: 'linear-gradient(180deg, #0a1a3a 0%, #030818 100%)',
+            border: '2px solid #f5c518',
+            boxShadow: '0 0 30px rgba(245,197,24,0.25)',
+          }}
+        >
+          <div className="flex items-center justify-center gap-2 mb-2 text-yellow-300">
+            <Trophy className="w-4 h-4" />
+            <h3 className="text-xs font-black tracking-widest" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.9)' }}>
+              LEADERBOARD
+            </h3>
+          </div>
+          <div className="flex flex-col gap-1">
+            {[...participants]
+              .filter((p) => p.role === 'guest')
+              .sort((a, b) => b.current_ladder_amount - a.current_ladder_amount)
+              .slice(0, 10)
+              .map((p, i) => (
+                <div
+                  key={p.id}
+                  className="flex items-center justify-between px-2.5 py-1 rounded"
+                  style={{
+                    background: i === 0
+                      ? 'linear-gradient(90deg, #f5c518 0%, #ffdb4a 100%)'
+                      : 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    opacity: p.is_eliminated ? 0.4 : 1,
+                  }}
+                >
+                  <span
+                    className={`font-bold text-xs truncate max-w-[140px] ${i === 0 ? 'text-black' : 'text-white'}`}
+                    style={{ textShadow: i === 0 ? 'none' : '0 1px 2px rgba(0,0,0,0.8)' }}
+                  >
+                    #{i + 1} {p.display_name || p.user_id.slice(0, 6)}
+                  </span>
+                  <span
+                    className={`font-black text-xs ${i === 0 ? 'text-black' : 'text-yellow-300'}`}
+                    style={{ textShadow: i === 0 ? 'none' : '0 1px 2px rgba(0,0,0,0.8)' }}
+                  >
+                    {formatJC(p.current_ladder_amount)}
+                  </span>
+                </div>
+              ))}
+            {participants.filter((p) => p.role === 'guest').length === 0 && (
+              <p className="text-white/60 text-xs text-center py-2">No players yet</p>
+            )}
+          </div>
+        </div>
+      )}
+
+
       {/* Question banner + answers — bottom of screen */}
       {showQuestion && (
         <div className="pb-10 px-10 flex flex-col items-center gap-5">
