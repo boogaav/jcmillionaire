@@ -484,6 +484,27 @@ export default function LiveBroadcast() {
                   {session.current_question_index + 1 >= questions.length ? 'Finish Game' : 'Next Question'}
                 </button>
               )}
+              <div className="pt-2 mt-1 border-t border-white/10 flex flex-col gap-1.5">
+                <div className="text-[10px] uppercase tracking-widest text-white/50">Panels</div>
+                <label className="flex items-center justify-between gap-2 text-xs text-white cursor-pointer">
+                  <span>Ladder (left)</span>
+                  <input
+                    type="checkbox"
+                    checked={showLadderPanel}
+                    onChange={() => togglePanel('panel_ladder')}
+                    className="accent-yellow-400"
+                  />
+                </label>
+                <label className="flex items-center justify-between gap-2 text-xs text-white cursor-pointer">
+                  <span>Leaderboard (right)</span>
+                  <input
+                    type="checkbox"
+                    checked={showLeaderboardPanel}
+                    onChange={() => togglePanel('panel_lb')}
+                    className="accent-yellow-400"
+                  />
+                </label>
+              </div>
             </div>
           )}
         </div>
