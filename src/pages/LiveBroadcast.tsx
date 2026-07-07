@@ -35,8 +35,9 @@ interface LiveQuestion {
 const CHOICES: Choice[] = ['A', 'B', 'C', 'D'];
 
 export default function LiveBroadcast() {
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const bg = params.get('bg') || 'green';
+  const showControls = params.get('controls') !== '0';
   const bgStyle: React.CSSProperties =
     bg === 'transparent'
       ? { background: 'transparent' }
@@ -44,6 +45,7 @@ export default function LiveBroadcast() {
       ? { background: '#000' }
       : { background: '#00b140' }; // chroma-key green
 
+  const { isAdmin } = useGame();
   const [session, setSession] = useState<LiveSession | null>(null);
   const [questions, setQuestions] = useState<LiveQuestion[]>([]);
 
