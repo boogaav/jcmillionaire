@@ -218,6 +218,7 @@ export default function Live() {
           answers={answers}
           quizSets={quizSets}
           reload={loadAll}
+          adminUserId={user?.id || ''}
         />
       ) : (
         <PlayerView
@@ -441,7 +442,7 @@ function Leaderboard({ participants, highlightUserId, finished }: { participants
 /* ---------------- Admin view ---------------- */
 
 function AdminView({
-  session, questions, participants, answers, quizSets, reload,
+  session, questions, participants, answers, quizSets, reload, adminUserId,
 }: {
   session: LiveSession | null;
   questions: LiveQuestion[];
@@ -449,82 +450,48 @@ function AdminView({
   answers: LiveAnswer[];
   quizSets: LiveQuizSet[];
   reload: () => Promise<void>;
+  adminUserId: string;
 }) {
   const [selectedSetId, setSelectedSetId] = useState<string>('');
   const [showBuilder, setShowBuilder] = useState(false);
 
-  const startSession = async () => {
-    if (!selectedSetId) {
-      toast.error('Pick a quiz set first');
-      return;
-    }
-    // Deactivate any old sessions
-    await supabase.from('live_sessions').update({ is_active: false }).eq('is_active', true);
-    const { error } = await supabase.from('live_sessions').insert({
-      quiz_set_id: selectedSetId,
-      status: 'lobby',
-      current_question_index: 0,
-      is_active: true,
+  const invoke = async (action: string, extras: Record<string, unknown> = {}) => {
+    if (!adminUserId) { toast.error('Admin user missing'); return null; }
+    const { data, error } = await supabase.functions.invoke('live-admin', {
+      body: { admin_user_id: adminUserId, action, ...extras },
     });
-    if (error) toast.error(error.message);
-    else toast.success('Live session created — players can join!');
+    if (error) { toast.error(error.message); return null; }
+    if (data?.error) { toast.error(data.error); return null; }
+    return data;
+  };
+
+  const startSession = async () => {
+    if (!selectedSetId) { toast.error('Pick a quiz set first'); return; }
+    const res = await invoke('start_session', { quiz_set_id: selectedSetId });
+    if (res) toast.success('Live session created — players can join!');
     await reload();
   };
 
   const startQuestion = async () => {
     if (!session) return;
-    await supabase
-      .from('live_sessions')
-      .update({ status: 'question', current_question_started_at: new Date().toISOString() })
-      .eq('id', session.id);
+    await invoke('start_question', { session_id: session.id });
   };
 
   const revealAnswer = async () => {
     if (!session) return;
-    const currentQ = questions[session.current_question_index];
-    if (!currentQ) return;
-
-    // Update ladder amounts for participants who answered correctly
-    const questionAnswers = answers.filter((a) => a.question_id === currentQ.id);
-    for (const p of participants.filter((x) => x.role === 'guest' && !x.is_eliminated)) {
-      const ans = questionAnswers.find((a) => a.user_id === p.user_id);
-      if (ans && ans.is_correct) {
-        await supabase
-          .from('live_participants')
-          .update({
-            current_ladder_amount: currentQ.prize_amount,
-            reached_index: session.current_question_index + 1,
-          })
-          .eq('id', p.id);
-      } else {
-        // No answer or wrong answer → eliminated
-        await supabase
-          .from('live_participants')
-          .update({ is_eliminated: true })
-          .eq('id', p.id);
-      }
-    }
-    await supabase.from('live_sessions').update({ status: 'reveal' }).eq('id', session.id);
+    await invoke('reveal_answer', { session_id: session.id });
   };
 
   const nextQuestion = async () => {
     if (!session) return;
-    const nextIdx = session.current_question_index + 1;
-    if (nextIdx >= questions.length) {
-      await supabase.from('live_sessions').update({ status: 'finished' }).eq('id', session.id);
-      toast.success('Game finished!');
-      return;
-    }
-    await supabase
-      .from('live_sessions')
-      .update({ current_question_index: nextIdx, status: 'question', current_question_started_at: new Date().toISOString() })
-      .eq('id', session.id);
+    const res = await invoke('next_question', { session_id: session.id });
+    if (res?.finished) toast.success('Game finished!');
   };
 
   const endSession = async () => {
     if (!session) return;
     if (!confirm('End the live session?')) return;
-    await supabase.from('live_sessions').update({ is_active: false, status: 'finished' }).eq('id', session.id);
+    await invoke('end_session', { session_id: session.id });
     await reload();
   };
 

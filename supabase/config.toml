@@ -21,3 +21,6 @@ verify_jwt = false
 
 [functions.verify-telegram]
 verify_jwt = false
+
+[functions.live-admin]
+verify_jwt = false
