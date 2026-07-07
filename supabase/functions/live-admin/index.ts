@@ -14,6 +14,7 @@ type Action =
   | 'start_session'
   | 'start_question'
   | 'reveal_answer'
+  | 'show_ladder'
   | 'next_question'
   | 'end_session';
 
@@ -123,6 +124,16 @@ serve(async (req) => {
       if (error) return json(500, { error: error.message });
       return json(200, { ok: true });
     }
+
+    if (action === 'show_ladder') {
+      const { error } = await supabase
+        .from('live_sessions')
+        .update({ status: 'ladder' })
+        .eq('id', session_id);
+      if (error) return json(500, { error: error.message });
+      return json(200, { ok: true });
+    }
+
 
     if (action === 'next_question') {
       const { data: questions } = await supabase
