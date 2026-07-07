@@ -310,6 +310,15 @@ function PlayerView({
 
   return (
     <div className="space-y-4">
+      {role === 'spectator' && (
+        <Card className="p-4 bg-gradient-to-r from-primary/20 to-primary/5 border-primary/30 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">👋</span>
+            <span className="font-semibold text-sm">Login to join the show</span>
+          </div>
+          <LoginButtons compact />
+        </Card>
+      )}
       <div className="flex items-center justify-between text-sm">
         <span className="font-semibold">Q{session.current_question_index + 1} / {questions.length}</span>
         <span className="text-primary font-bold">{formatJC(currentQ.prize_amount)} $JC</span>
