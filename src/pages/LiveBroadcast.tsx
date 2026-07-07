@@ -6,6 +6,9 @@ import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { formatJC } from '@/lib/constants';
+import { useGame } from '@/contexts/GameContext';
+import { toast } from 'sonner';
+import { Play, Check, SkipForward, EyeOff } from 'lucide-react';
 
 type SessionStatus = 'lobby' | 'question' | 'reveal' | 'finished';
 type Choice = 'A' | 'B' | 'C' | 'D';
