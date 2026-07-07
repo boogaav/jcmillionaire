@@ -94,6 +94,7 @@ export default function LiveBroadcast() {
 
   const currentQ = session ? questions[session.current_question_index] : undefined;
   const showReveal = session?.status === 'reveal';
+  const showLadder = session?.status === 'ladder';
   const showQuestion = session && currentQ && (session.status === 'question' || session.status === 'reveal');
 
   const startQuestion = async () => {
@@ -108,6 +109,11 @@ export default function LiveBroadcast() {
       await callLiveAdmin(adminUserId, 'reveal_answer', { session_id: session.id });
       toast.success('Answer revealed');
     } catch (e) { toast.error((e as Error).message); }
+  };
+  const showLadderScreen = async () => {
+    if (!session || !adminUserId) return;
+    try { await callLiveAdmin(adminUserId, 'show_ladder', { session_id: session.id }); }
+    catch (e) { toast.error((e as Error).message); }
   };
   const nextQuestion = async () => {
     if (!session || !adminUserId) return;
