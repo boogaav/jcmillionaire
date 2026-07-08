@@ -407,8 +407,11 @@ function ParticipantsList({ participants }: { participants: LiveParticipant[] })
   );
 }
 
-function Leaderboard({ participants, highlightUserId, finished }: { participants: LiveParticipant[]; highlightUserId?: string; finished?: boolean }) {
-  const players = [...participants].filter((p) => p.role === 'guest').sort((a, b) => b.current_ladder_amount - a.current_ladder_amount);
+function Leaderboard({ participants, answers = [], highlightUserId, finished }: { participants: LiveParticipant[]; answers?: LiveAnswer[]; highlightUserId?: string; finished?: boolean }) {
+  const scoreFor = (userId: string) => answers.filter((a) => a.user_id === userId && a.is_correct).length;
+  const players = [...participants]
+    .filter((p) => p.role === 'guest')
+    .sort((a, b) => scoreFor(b.user_id) - scoreFor(a.user_id));
   return (
     <Card className="p-5 space-y-3">
       <div className="flex items-center gap-2">
@@ -429,12 +432,13 @@ function Leaderboard({ participants, highlightUserId, finished }: { participants
             <span className="font-semibold">{p.display_name || p.user_id.slice(0, 6)}</span>
             {p.is_eliminated && <Badge variant="destructive" className="text-xs">Out</Badge>}
           </div>
-          <span className="font-bold text-primary">{formatJC(p.current_ladder_amount)} $JC</span>
+          <span className="font-bold text-primary">{scoreFor(p.user_id)} / 15 pts</span>
         </div>
       ))}
     </Card>
   );
 }
+
 
 /* ---------------- Admin view ---------------- */
 
