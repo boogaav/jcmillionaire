@@ -9,7 +9,7 @@ interface JackieIconProps {
 export const JackieIcon: React.FC<JackieIconProps> = ({ className = '', size = 48 }) => {
   return (
     <img
-      src={jcCoinImage}
+      src={jcCoinAsset.url}
       alt="Jackie Chain"
       width={size}
       height={size}
