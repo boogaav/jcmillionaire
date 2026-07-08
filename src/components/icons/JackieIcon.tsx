@@ -1,5 +1,5 @@
 import React from 'react';
-import jcCoinImage from '@/assets/jc-coin.png';
+import jcCoinAsset from '@/assets/jc-coin.png.asset.json';
 
 interface JackieIconProps {
   className?: string;
@@ -9,7 +9,7 @@ interface JackieIconProps {
 export const JackieIcon: React.FC<JackieIconProps> = ({ className = '', size = 48 }) => {
   return (
     <img
-      src={jcCoinImage}
+      src={jcCoinAsset.url}
       alt="Jackie Chain"
       width={size}
       height={size}
@@ -22,7 +22,7 @@ export const JackieIcon: React.FC<JackieIconProps> = ({ className = '', size = 4
 export const CoinIcon: React.FC<JackieIconProps> = ({ className = '', size = 24 }) => {
   return (
     <img
-      src={jcCoinImage}
+      src={jcCoinAsset.url}
       alt="JC Token"
       width={size}
       height={size}
