@@ -377,14 +377,17 @@ function PlayerView({
       {me && (
         <Card className="p-4 flex items-center justify-between">
           <div>
-            <p className="text-xs text-muted-foreground">Your stack</p>
-            <p className="text-xl font-bold text-primary">{formatJC(me.current_ladder_amount)} $JC</p>
+            <p className="text-xs text-muted-foreground">Your score</p>
+            <p className="text-xl font-bold text-primary">
+              {answers.filter((a) => a.user_id === me.user_id && a.is_correct).length} / 15 pts
+            </p>
           </div>
           {me.is_eliminated && <Badge variant="destructive">Eliminated</Badge>}
         </Card>
       )}
 
-      <Leaderboard participants={participants} highlightUserId={userId} />
+      <Leaderboard participants={participants} answers={answers} highlightUserId={userId} />
+
     </div>
   );
 }
