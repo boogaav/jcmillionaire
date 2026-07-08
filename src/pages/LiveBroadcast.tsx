@@ -122,6 +122,8 @@ export default function LiveBroadcast() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'live_sessions' }, () => load())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'live_questions' }, () => load())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'live_participants' }, () => load())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_answers' }, () => load())
+
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
