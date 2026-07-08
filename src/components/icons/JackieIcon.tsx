@@ -1,5 +1,5 @@
 import React from 'react';
-import jcCoinImage from '@/assets/jc-coin.png';
+import jcCoinAsset from '@/assets/jc-coin.png.asset.json';
 
 interface JackieIconProps {
   className?: string;
