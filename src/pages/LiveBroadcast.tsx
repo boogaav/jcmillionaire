@@ -70,6 +70,8 @@ export default function LiveBroadcast() {
   const [session, setSession] = useState<LiveSession | null>(null);
   const [questions, setQuestions] = useState<LiveQuestion[]>([]);
   const [participants, setParticipants] = useState<LiveParticipant[]>([]);
+  const [correctByUser, setCorrectByUser] = useState<Record<string, number>>({});
+
 
   const load = async () => {
     const { data: sess } = await supabase
@@ -96,9 +98,21 @@ export default function LiveBroadcast() {
         .select('id, user_id, display_name, role, current_ladder_amount, is_eliminated')
         .eq('session_id', sess.id);
       setParticipants((parts as LiveParticipant[]) || []);
+
+      const { data: ans } = await supabase
+        .from('live_answers')
+        .select('user_id, is_correct')
+        .eq('session_id', sess.id);
+      const counts: Record<string, number> = {};
+      (ans || []).forEach((a: any) => {
+        if (a.is_correct) counts[a.user_id] = (counts[a.user_id] || 0) + 1;
+      });
+      setCorrectByUser(counts);
     } else {
       setParticipants([]);
+      setCorrectByUser({});
     }
+
   };
 
   useEffect(() => {
@@ -108,6 +122,8 @@ export default function LiveBroadcast() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'live_sessions' }, () => load())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'live_questions' }, () => load())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'live_participants' }, () => load())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_answers' }, () => load())
+
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
@@ -332,7 +348,7 @@ export default function LiveBroadcast() {
           <div className="flex flex-col gap-1">
             {[...participants]
               .filter((p) => p.role === 'guest')
-              .sort((a, b) => b.current_ladder_amount - a.current_ladder_amount)
+              .sort((a, b) => (correctByUser[b.user_id] || 0) - (correctByUser[a.user_id] || 0))
               .slice(0, 10)
               .map((p, i) => (
                 <div
@@ -356,10 +372,11 @@ export default function LiveBroadcast() {
                     className={`font-black text-xs ${i === 0 ? 'text-black' : 'text-yellow-300'}`}
                     style={{ textShadow: i === 0 ? 'none' : '0 1px 2px rgba(0,0,0,0.8)' }}
                   >
-                    {formatJC(p.current_ladder_amount)}
+                    {correctByUser[p.user_id] || 0}/15
                   </span>
                 </div>
               ))}
+
             {participants.filter((p) => p.role === 'guest').length === 0 && (
               <p className="text-white/60 text-xs text-center py-2">No players yet</p>
             )}

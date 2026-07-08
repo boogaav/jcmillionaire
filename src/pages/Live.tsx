@@ -295,7 +295,7 @@ function PlayerView({
   }
 
   if (session.status === 'finished') {
-    return <Leaderboard participants={participants} highlightUserId={userId} finished />;
+    return <Leaderboard participants={participants} answers={answers} highlightUserId={userId} finished />;
   }
 
   if (!currentQ) {
@@ -377,14 +377,17 @@ function PlayerView({
       {me && (
         <Card className="p-4 flex items-center justify-between">
           <div>
-            <p className="text-xs text-muted-foreground">Your stack</p>
-            <p className="text-xl font-bold text-primary">{formatJC(me.current_ladder_amount)} $JC</p>
+            <p className="text-xs text-muted-foreground">Your score</p>
+            <p className="text-xl font-bold text-primary">
+              {answers.filter((a) => a.user_id === me.user_id && a.is_correct).length} / 15 pts
+            </p>
           </div>
           {me.is_eliminated && <Badge variant="destructive">Eliminated</Badge>}
         </Card>
       )}
 
-      <Leaderboard participants={participants} highlightUserId={userId} />
+      <Leaderboard participants={participants} answers={answers} highlightUserId={userId} />
+
     </div>
   );
 }
@@ -404,8 +407,11 @@ function ParticipantsList({ participants }: { participants: LiveParticipant[] })
   );
 }
 
-function Leaderboard({ participants, highlightUserId, finished }: { participants: LiveParticipant[]; highlightUserId?: string; finished?: boolean }) {
-  const players = [...participants].filter((p) => p.role === 'guest').sort((a, b) => b.current_ladder_amount - a.current_ladder_amount);
+function Leaderboard({ participants, answers = [], highlightUserId, finished }: { participants: LiveParticipant[]; answers?: LiveAnswer[]; highlightUserId?: string; finished?: boolean }) {
+  const scoreFor = (userId: string) => answers.filter((a) => a.user_id === userId && a.is_correct).length;
+  const players = [...participants]
+    .filter((p) => p.role === 'guest')
+    .sort((a, b) => scoreFor(b.user_id) - scoreFor(a.user_id));
   return (
     <Card className="p-5 space-y-3">
       <div className="flex items-center gap-2">
@@ -426,12 +432,13 @@ function Leaderboard({ participants, highlightUserId, finished }: { participants
             <span className="font-semibold">{p.display_name || p.user_id.slice(0, 6)}</span>
             {p.is_eliminated && <Badge variant="destructive" className="text-xs">Out</Badge>}
           </div>
-          <span className="font-bold text-primary">{formatJC(p.current_ladder_amount)} $JC</span>
+          <span className="font-bold text-primary">{scoreFor(p.user_id)} / 15 pts</span>
         </div>
       ))}
     </Card>
   );
 }
+
 
 /* ---------------- Admin view ---------------- */
 
@@ -581,7 +588,7 @@ function AdminView({
         </div>
       </Card>
 
-      <Leaderboard participants={participants} />
+      <Leaderboard participants={participants} answers={answers} />
       <ParticipantsList participants={participants} />
     </div>
   );
