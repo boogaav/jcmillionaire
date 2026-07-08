@@ -22,7 +22,7 @@ export const JackieIcon: React.FC<JackieIconProps> = ({ className = '', size = 4
 export const CoinIcon: React.FC<JackieIconProps> = ({ className = '', size = 24 }) => {
   return (
     <img
-      src={jcCoinImage}
+      src={jcCoinAsset.url}
       alt="JC Token"
       width={size}
       height={size}
