@@ -295,7 +295,7 @@ function PlayerView({
   }
 
   if (session.status === 'finished') {
-    return <Leaderboard participants={participants} highlightUserId={userId} finished />;
+    return <Leaderboard participants={participants} answers={answers} highlightUserId={userId} finished />;
   }
 
   if (!currentQ) {
