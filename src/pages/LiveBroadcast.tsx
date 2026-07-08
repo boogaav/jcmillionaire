@@ -70,6 +70,8 @@ export default function LiveBroadcast() {
   const [session, setSession] = useState<LiveSession | null>(null);
   const [questions, setQuestions] = useState<LiveQuestion[]>([]);
   const [participants, setParticipants] = useState<LiveParticipant[]>([]);
+  const [correctByUser, setCorrectByUser] = useState<Record<string, number>>({});
+
 
   const load = async () => {
     const { data: sess } = await supabase
