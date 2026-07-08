@@ -588,7 +588,7 @@ function AdminView({
         </div>
       </Card>
 
-      <Leaderboard participants={participants} />
+      <Leaderboard participants={participants} answers={answers} />
       <ParticipantsList participants={participants} />
     </div>
   );
