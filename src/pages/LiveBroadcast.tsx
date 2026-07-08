@@ -98,9 +98,21 @@ export default function LiveBroadcast() {
         .select('id, user_id, display_name, role, current_ladder_amount, is_eliminated')
         .eq('session_id', sess.id);
       setParticipants((parts as LiveParticipant[]) || []);
+
+      const { data: ans } = await supabase
+        .from('live_answers')
+        .select('user_id, is_correct')
+        .eq('session_id', sess.id);
+      const counts: Record<string, number> = {};
+      (ans || []).forEach((a: any) => {
+        if (a.is_correct) counts[a.user_id] = (counts[a.user_id] || 0) + 1;
+      });
+      setCorrectByUser(counts);
     } else {
       setParticipants([]);
+      setCorrectByUser({});
     }
+
   };
 
   useEffect(() => {
