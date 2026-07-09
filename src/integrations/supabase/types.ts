@@ -415,6 +415,8 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          passcode: string | null
+          slug: string | null
           updated_at: string
         }
         Insert: {
@@ -423,6 +425,8 @@ export type Database = {
           description?: string | null
           id?: string
           name: string
+          passcode?: string | null
+          slug?: string | null
           updated_at?: string
         }
         Update: {
@@ -431,6 +435,8 @@ export type Database = {
           description?: string | null
           id?: string
           name?: string
+          passcode?: string | null
+          slug?: string | null
           updated_at?: string
         }
         Relationships: []
