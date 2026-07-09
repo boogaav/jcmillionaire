@@ -193,6 +193,13 @@ export default function Live() {
   return (
     <div className="min-h-screen pt-4 pb-32 px-4 max-w-2xl mx-auto">
       <Header role={role} session={session} participantCount={participants.filter(p => p.role !== 'admin').length} />
+      <div className="mb-4">
+        <a href="/live/new" className="block">
+          <Button variant="outline" className="w-full gap-2 border-primary/40 text-primary hover:bg-primary/10">
+            <Plus className="w-4 h-4" /> Create your own live show
+          </Button>
+        </a>
+      </div>
       {role === 'admin' ? (
         <AdminView
           session={session}
