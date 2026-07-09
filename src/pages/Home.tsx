@@ -101,6 +101,7 @@ const Home: React.FC = () => {
 
   return (
     <div className="min-h-screen gradient-hero flex flex-col pt-16">
+      <WelcomeVideoPopup />
       <ShareModal
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
