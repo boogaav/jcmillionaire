@@ -142,9 +142,21 @@ export default function LiveCreate() {
 
   return (
     <div className="min-h-screen pt-4 pb-32 px-4 max-w-2xl mx-auto space-y-5">
-      <div className="flex items-center gap-2 text-primary">
-        <Radio className="w-6 h-6 animate-pulse" />
-        <h1 className="text-2xl font-display font-bold">Create a Live Show</h1>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-primary">
+          <Radio className="w-6 h-6 animate-pulse" />
+          <h1 className="text-2xl font-display font-bold">Create a Live Show</h1>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          {savedAt && (
+            <span className="flex items-center gap-1"><Save className="w-3 h-3" /> Draft saved</span>
+          )}
+          {(title || rawText || passcode || slug) && (
+            <Button variant="ghost" size="sm" onClick={clearDraft} className="h-7 gap-1 text-destructive hover:text-destructive">
+              <Trash2 className="w-3 h-3" /> Clear
+            </Button>
+          )}
+        </div>
       </div>
 
       <Card className="p-4 space-y-4">
