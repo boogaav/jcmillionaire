@@ -27,10 +27,22 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const LIVE_SUBDOMAIN_HOSTS = ['app.jackiechain.world'];
+
 const AppContent = () => {
   const { isLoading } = useGame();
   const location = useLocation();
   const isBroadcast = location.pathname.toLowerCase().startsWith('/live/broadcast');
+
+  // On the dedicated Live subdomain, force root → /live
+  if (
+    typeof window !== 'undefined' &&
+    LIVE_SUBDOMAIN_HOSTS.includes(window.location.hostname) &&
+    location.pathname === '/'
+  ) {
+    window.location.replace('/live');
+    return <LoadingScreen />;
+  }
 
   if (isLoading) {
     return <LoadingScreen />;
