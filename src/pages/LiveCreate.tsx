@@ -120,6 +120,7 @@ export default function LiveCreate() {
         return;
       }
       toast.success('Show created! Share the link with your audience.');
+      try { localStorage.removeItem(draftKey); } catch {}
       navigate(`/live/${qset.slug}`);
     } finally {
       setSubmitting(false);
