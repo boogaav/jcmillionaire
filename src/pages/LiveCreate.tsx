@@ -1,9 +1,9 @@
 // /live/new — any signed-in user can create their own 15-question ladder
 // and get a shareable URL /live/:slug they control.
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Radio, Copy, Sparkles, AlertTriangle } from 'lucide-react';
+import { Radio, Copy, Sparkles, AlertTriangle, Save, Trash2 } from 'lucide-react';
 
 import { supabase } from '@/integrations/supabase/client';
 import { useGame } from '@/contexts/GameContext';
