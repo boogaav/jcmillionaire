@@ -10,6 +10,7 @@ import { ShareModal } from '@/components/referral/ShareModal';
 import { TrailerCard } from '@/components/home/TrailerCard';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { LoginButtons } from '@/components/LoginButtons';
+import { WelcomeVideoPopup } from '@/components/WelcomeVideoPopup';
 import { useGame } from '@/contexts/GameContext';
 import { Play, ChevronRight, X, Zap, Gift, Share2, Copy, MessageCircle } from 'lucide-react';
 import { generateReferralCode } from '@/lib/referralService';
@@ -100,6 +101,7 @@ const Home: React.FC = () => {
 
   return (
     <div className="min-h-screen gradient-hero flex flex-col pt-16">
+      <WelcomeVideoPopup />
       <ShareModal
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
