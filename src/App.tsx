@@ -21,6 +21,8 @@ import Admin from "./pages/Admin";
 import Analytics from "./pages/Analytics";
 import About from "./pages/About";
 import Live from "./pages/Live";
+import LiveShow from "./pages/LiveShow";
+import LiveCreate from "./pages/LiveCreate";
 import LiveBroadcast from "./pages/LiveBroadcast";
 import { useLocation } from "react-router-dom";
 import NotFound from "./pages/NotFound";
