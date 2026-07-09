@@ -100,15 +100,6 @@ serve(async (req) => {
       return json(200, { session: data });
     }
 
-    if (!session_id) return json(400, { error: 'session_id required' });
-
-    // Load session + questions for state transitions
-    const { data: session, error: sErr } = await supabase
-      .from('live_sessions')
-      .select('*')
-      .eq('id', session_id)
-      .single();
-    if (sErr || !session) return json(404, { error: 'session not found' });
 
     if (action === 'start_question') {
       const { error } = await supabase
