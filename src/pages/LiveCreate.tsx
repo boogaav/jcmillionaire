@@ -1,9 +1,9 @@
 // /live/new — any signed-in user can create their own 15-question ladder
 // and get a shareable URL /live/:slug they control.
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Radio, Copy, Sparkles, AlertTriangle } from 'lucide-react';
+import { Radio, Copy, Sparkles, AlertTriangle, Save, Trash2 } from 'lucide-react';
 
 import { supabase } from '@/integrations/supabase/client';
 import { useGame } from '@/contexts/GameContext';
@@ -30,12 +30,62 @@ export default function LiveCreate() {
   const { state } = useGame();
   const user = state.user;
 
+  const draftKey = user ? `live_draft_v1:${user.id}` : 'live_draft_v1:anon';
+
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
   const [slugTouched, setSlugTouched] = useState(false);
   const [passcode, setPasscode] = useState('');
   const [rawText, setRawText] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [savedAt, setSavedAt] = useState<number | null>(null);
+  const hydratedRef = useRef(false);
+
+  // Hydrate draft on mount / when user changes
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d && typeof d === 'object') {
+          setTitle(d.title || '');
+          setSlug(d.slug || '');
+          setSlugTouched(!!d.slugTouched);
+          setPasscode(d.passcode || '');
+          setRawText(d.rawText || '');
+          setSavedAt(d.savedAt || null);
+          if (d.title || d.rawText) toast.info('Draft restored');
+        }
+      }
+    } catch {}
+    hydratedRef.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draftKey]);
+
+  // Autosave (debounced)
+  useEffect(() => {
+    if (!hydratedRef.current) return;
+    const t = setTimeout(() => {
+      const hasContent = title || slug || passcode || rawText;
+      if (!hasContent) return;
+      const now = Date.now();
+      try {
+        localStorage.setItem(
+          draftKey,
+          JSON.stringify({ title, slug, slugTouched, passcode, rawText, savedAt: now }),
+        );
+        setSavedAt(now);
+      } catch {}
+    }, 600);
+    return () => clearTimeout(t);
+  }, [title, slug, slugTouched, passcode, rawText, draftKey]);
+
+  const clearDraft = () => {
+    try { localStorage.removeItem(draftKey); } catch {}
+    setTitle(''); setSlug(''); setSlugTouched(false); setPasscode(''); setRawText('');
+    setSavedAt(null);
+    toast.success('Draft cleared');
+  };
 
   const parsed = useMemo(() => parseLadder(rawText || ''), [rawText]);
   const canSubmit = !!user && title.trim().length >= 3 && /^[a-z0-9][a-z0-9-]{2,39}$/.test(slug) && parsed.questions.length === 15 && parsed.errors.length === 0;
@@ -70,6 +120,7 @@ export default function LiveCreate() {
         return;
       }
       toast.success('Show created! Share the link with your audience.');
+      try { localStorage.removeItem(draftKey); } catch {}
       navigate(`/live/${qset.slug}`);
     } finally {
       setSubmitting(false);
@@ -91,9 +142,21 @@ export default function LiveCreate() {
 
   return (
     <div className="min-h-screen pt-4 pb-32 px-4 max-w-2xl mx-auto space-y-5">
-      <div className="flex items-center gap-2 text-primary">
-        <Radio className="w-6 h-6 animate-pulse" />
-        <h1 className="text-2xl font-display font-bold">Create a Live Show</h1>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-primary">
+          <Radio className="w-6 h-6 animate-pulse" />
+          <h1 className="text-2xl font-display font-bold">Create a Live Show</h1>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          {savedAt && (
+            <span className="flex items-center gap-1"><Save className="w-3 h-3" /> Draft saved</span>
+          )}
+          {(title || rawText || passcode || slug) && (
+            <Button variant="ghost" size="sm" onClick={clearDraft} className="h-7 gap-1 text-destructive hover:text-destructive">
+              <Trash2 className="w-3 h-3" /> Clear
+            </Button>
+          )}
+        </div>
       </div>
 
       <Card className="p-4 space-y-4">
