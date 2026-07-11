@@ -342,9 +342,10 @@ export default function LiveCreate() {
             className="font-mono text-sm"
           />
           <div className="text-xs text-muted-foreground space-y-1">
-            <p><strong>Format:</strong> question line, then 4 lines <code>A) B) C) D)</code>, then <code>Correct: B</code>. Optional <code>Prize: 100</code>. Separate questions with a blank line.</p>
+            <p><strong>Format:</strong> question line, then 4 lines <code>A) B) C) D)</code>, then <code>Correct: B</code>. Optional <code>Prize: 100</code> and <code>Image: https://…</code>. Separate questions with a blank line.</p>
             <p>Prize defaults to the standard $JC ladder if omitted.</p>
           </div>
+
 
           <div className="flex items-center justify-between text-sm">
             <span className={parsed.questions.length === 15 ? 'text-green-500 font-semibold' : 'text-muted-foreground'}>
