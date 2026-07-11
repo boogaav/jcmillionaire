@@ -55,6 +55,8 @@ export default function LiveCreate() {
   const [slugTouched, setSlugTouched] = useState(false);
   const [passcode, setPasscode] = useState('');
   const [rawText, setRawText] = useState('');
+  const [imageOverrides, setImageOverrides] = useState<Record<number, string>>({});
+  const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [loading, setLoading] = useState(isEdit);
@@ -62,6 +64,7 @@ export default function LiveCreate() {
   const [editLocked, setEditLocked] = useState(false);
   const [notOwner, setNotOwner] = useState(false);
   const hydratedRef = useRef(false);
+
 
   // Load existing show for edit mode
   useEffect(() => {
