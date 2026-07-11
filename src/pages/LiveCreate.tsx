@@ -153,6 +153,13 @@ export default function LiveCreate() {
 
   const effectiveSlug = slug || (slugTouched ? '' : slugify(title));
 
+  // Merge image override into parsed row (override wins over Image: line)
+  const withImages = (rows: typeof parsed.questions) =>
+    rows.map((q, i) => ({
+      ...q,
+      image_url: (imageOverrides[i] ?? q.image_url ?? null) || null,
+    }));
+
   const submit = async () => {
     if (!user) return;
     if (!canSubmit) { toast.error('Fill in the form and paste 15 valid questions.'); return; }
@@ -170,7 +177,7 @@ export default function LiveCreate() {
         }
         // Replace questions
         await supabase.from('live_questions').delete().eq('quiz_set_id', editSetId);
-        const rows = parsed.questions.map((q) => ({ ...q, quiz_set_id: editSetId }));
+        const rows = withImages(parsed.questions).map((q) => ({ ...q, quiz_set_id: editSetId }));
         const { error: qsErr } = await supabase.from('live_questions').insert(rows);
         if (qsErr) { toast.error(qsErr.message); return; }
         toast.success('Show updated');
@@ -191,7 +198,7 @@ export default function LiveCreate() {
           toast.error(qErr?.message.includes('live_quiz_sets_slug_key') ? 'That URL is already taken.' : (qErr?.message || 'Failed to create show'));
           return;
         }
-        const rows = parsed.questions.map((q) => ({ ...q, quiz_set_id: qset.id }));
+        const rows = withImages(parsed.questions).map((q) => ({ ...q, quiz_set_id: qset.id }));
         const { error: qsErr } = await supabase.from('live_questions').insert(rows);
         if (qsErr) { toast.error(qsErr.message); return; }
         toast.success('Show created! Share the link with your audience.');
@@ -202,6 +209,27 @@ export default function LiveCreate() {
       setSubmitting(false);
     }
   };
+
+  const uploadImage = async (idx: number, file: File) => {
+    if (!user) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5 MB'); return; }
+    if (!file.type.startsWith('image/')) { toast.error('Please pick an image file'); return; }
+    setUploadingIdx(idx);
+    try {
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
+      const path = `live/${user.id}/${Date.now()}-${idx}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('question-images')
+        .upload(path, file, { cacheControl: '3600', upsert: false });
+      if (upErr) { toast.error(upErr.message); return; }
+      const { data: pub } = supabase.storage.from('question-images').getPublicUrl(path);
+      setImageOverrides((m) => ({ ...m, [idx]: pub.publicUrl }));
+      toast.success('Image uploaded');
+    } finally {
+      setUploadingIdx(null);
+    }
+  };
+
 
   if (!user) {
     return (
