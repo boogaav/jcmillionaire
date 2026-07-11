@@ -74,9 +74,9 @@ export default function LiveShow() {
   const [passcodeUnlocked, setPasscodeUnlocked] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const isCreator = !!user && !!quizSet && quizSet.created_by === user.id;
+  const isHost = !!user && !!quizSet && quizSet.created_by === user.id;
   // Effective role in the room
-  const role: Role = isCreator
+  const role: Role = isHost
     ? 'admin'
     : chosenRole === 'spectator'
       ? 'spectator'
@@ -88,11 +88,12 @@ export default function LiveShow() {
     if (!slug) return;
     const { data: qset } = await supabase
       .from('live_quiz_sets')
-      .select('id, name, slug, passcode, created_by, is_sandbox')
+      .select('id, name, slug, passcode, created_by, is_sandbox, host_wallet_address')
       .eq('slug', slug)
       .maybeSingle();
     if (!qset) { setNotFound(true); setLoading(false); return; }
     setQuizSet(qset as QuizSet);
+
 
     const [{ data: qs }, { data: sess }] = await Promise.all([
       supabase.from('live_questions').select('*').eq('quiz_set_id', qset.id).order('order_index'),
