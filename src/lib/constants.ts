@@ -31,6 +31,26 @@ export const DEFAULT_PRIZE_LADDER = [
   { questionNumber: 15, prizeAmount: 20000, isSafeHaven: false },
 ];
 
+// Prize ladder for LIVE shows — classic "Who Wants to Be a Millionaire" values, in $JC.
+// Safe havens at Q5 and Q10 (standard show format).
+export const LIVE_PRIZE_LADDER = [
+  { questionNumber: 1, prizeAmount: 100, isSafeHaven: false },
+  { questionNumber: 2, prizeAmount: 500, isSafeHaven: false },
+  { questionNumber: 3, prizeAmount: 1000, isSafeHaven: false },
+  { questionNumber: 4, prizeAmount: 2000, isSafeHaven: false },
+  { questionNumber: 5, prizeAmount: 4000, isSafeHaven: true },
+  { questionNumber: 6, prizeAmount: 5000, isSafeHaven: false },
+  { questionNumber: 7, prizeAmount: 10000, isSafeHaven: false },
+  { questionNumber: 8, prizeAmount: 35000, isSafeHaven: false },
+  { questionNumber: 9, prizeAmount: 50000, isSafeHaven: false },
+  { questionNumber: 10, prizeAmount: 65000, isSafeHaven: true },
+  { questionNumber: 11, prizeAmount: 100000, isSafeHaven: false },
+  { questionNumber: 12, prizeAmount: 125000, isSafeHaven: false },
+  { questionNumber: 13, prizeAmount: 250000, isSafeHaven: false },
+  { questionNumber: 14, prizeAmount: 500000, isSafeHaven: false },
+  { questionNumber: 15, prizeAmount: 1000000, isSafeHaven: false },
+];
+
 // Safe havens
 export const SAFE_HAVEN_QUESTIONS = [5, 10];
 
