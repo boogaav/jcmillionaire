@@ -26,6 +26,13 @@ export interface ParsedLadderQuestion {
   choice_d: string;
   correct_choice: 'A' | 'B' | 'C' | 'D';
   prize_amount: number;
+  image_url?: string | null;
+}
+  choice_b: string;
+  choice_c: string;
+  choice_d: string;
+  correct_choice: 'A' | 'B' | 'C' | 'D';
+  prize_amount: number;
 }
 
 export interface ParseResult {
