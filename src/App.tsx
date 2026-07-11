@@ -23,6 +23,7 @@ import About from "./pages/About";
 import Live from "./pages/Live";
 import LiveShow from "./pages/LiveShow";
 import LiveCreate from "./pages/LiveCreate";
+import LiveMine from "./pages/LiveMine";
 import LiveBroadcast from "./pages/LiveBroadcast";
 import { useLocation } from "react-router-dom";
 import NotFound from "./pages/NotFound";
@@ -78,7 +79,9 @@ const AppContent = () => {
         <Route path="/live" element={<Live />} />
         <Route path="/LIVE" element={<Live />} />
         <Route path="/live/new" element={<LiveCreate />} />
+        <Route path="/live/mine" element={<LiveMine />} />
         <Route path="/live/:slug" element={<LiveShow />} />
+        <Route path="/live/:slug/edit" element={<LiveCreate />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>
