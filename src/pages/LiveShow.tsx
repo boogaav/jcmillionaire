@@ -23,6 +23,7 @@ interface QuizSet {
   slug: string;
   passcode: string | null;
   created_by: string | null;
+  is_sandbox: boolean;
 }
 interface LiveSession {
   id: string;
@@ -83,7 +84,7 @@ export default function LiveShow() {
     if (!slug) return;
     const { data: qset } = await supabase
       .from('live_quiz_sets')
-      .select('id, name, slug, passcode, created_by')
+      .select('id, name, slug, passcode, created_by, is_sandbox')
       .eq('slug', slug)
       .maybeSingle();
     if (!qset) { setNotFound(true); setLoading(false); return; }
@@ -193,6 +194,11 @@ export default function LiveShow() {
           <h1 className="text-lg font-display font-bold truncate max-w-[40vw]">{quizSet.name}</h1>
           <Badge variant="outline" className="capitalize">{role}</Badge>
           {session && <Badge variant="secondary" className="capitalize">{session.status}</Badge>}
+          {quizSet.is_sandbox && (
+            <Badge variant="outline" className="border-amber-500/50 text-amber-500" title="Play-money only — does not touch the real $JC prize pool">
+              Sandbox
+            </Badge>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -284,7 +290,7 @@ function PlayerView({ role, session, questions, participants, answers, userId }:
   }
 
   if (session.status === 'finished') {
-    return <Leaderboard participants={participants} answers={answers} highlightUserId={userId} finished />;
+    return <FinalResults questions={questions} participants={participants} answers={answers} highlightUserId={userId} />;
   }
 
   if (!currentQ) return <Card className="p-6 text-center">Waiting for next question…</Card>;
@@ -395,6 +401,54 @@ function Leaderboard({ participants, answers = [], highlightUserId, finished }: 
         </div>
       ))}
     </Card>
+  );
+}
+
+/* ---------------- Final results (end-of-show) ---------------- */
+function FinalResults({ questions, participants, answers, highlightUserId }: {
+  questions: LiveQuestion[]; participants: LiveParticipant[]; answers: LiveAnswer[]; highlightUserId?: string;
+}) {
+  const guests = participants.filter((p) => p.role === 'guest');
+  const scoreFor = (userId: string) => answers.filter((a) => a.user_id === userId && a.is_correct).length;
+  const ranked = [...guests].sort((a, b) => scoreFor(b.user_id) - scoreFor(a.user_id));
+  const winner = ranked[0];
+  const winnerScore = winner ? scoreFor(winner.user_id) : 0;
+
+  return (
+    <div className="space-y-4">
+      {winner && (
+        <Card className="p-6 text-center bg-gradient-to-b from-primary/20 to-transparent border-primary/40">
+          <div className="text-5xl mb-2">🏆</div>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">Winner</p>
+          <p className="text-2xl font-bold text-primary">{winner.display_name || winner.user_id.slice(0, 6)}</p>
+          <p className="text-sm text-muted-foreground mt-1">{winnerScore} / {questions.length} correct</p>
+        </Card>
+      )}
+
+      <Leaderboard participants={participants} answers={answers} highlightUserId={highlightUserId} finished />
+
+      <Card className="p-5 space-y-3">
+        <h2 className="text-lg font-bold flex items-center gap-2"><Trophy className="w-5 h-5 text-primary" /> Per-question stats</h2>
+        {questions.map((q, i) => {
+          const qAns = answers.filter((a) => a.question_id === q.id);
+          const correct = qAns.filter((a) => a.is_correct).length;
+          const total = qAns.length;
+          const pct = total ? Math.round((correct / total) * 100) : 0;
+          return (
+            <div key={q.id} className="space-y-1">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-semibold truncate pr-2">Q{i + 1}. {q.question}</span>
+                <span className="text-muted-foreground shrink-0">{correct}/{total} ({pct}%)</span>
+              </div>
+              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
+              </div>
+              <p className="text-xs text-muted-foreground">Correct: <span className="text-green-500 font-semibold">{q.correct_choice}</span> — {q[`choice_${q.correct_choice.toLowerCase()}` as 'choice_a']}</p>
+            </div>
+          );
+        })}
+      </Card>
+    </div>
   );
 }
 
