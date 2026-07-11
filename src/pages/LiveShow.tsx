@@ -1,8 +1,8 @@
-// /live/:slug — a single show's page. Creator sees admin controls, everyone else spectates/plays.
+// /live/:slug — a single show's page. Host sees admin controls, everyone else spectates/plays.
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Check, X, Trophy, Users, Eye, Play, SkipForward, Radio, Copy, Lock, Share2 } from 'lucide-react';
+import { Check, X, Trophy, Users, Eye, Play, SkipForward, Radio, Copy, Lock, Share2, Coins, Wallet, ExternalLink } from 'lucide-react';
 
 import { supabase } from '@/integrations/supabase/client';
 import { useGame } from '@/contexts/GameContext';
@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { LoginButtons } from '@/components/LoginButtons';
 import { formatJC } from '@/lib/constants';
 import { cn } from '@/lib/utils';
+import { PoolTopUp } from '@/components/live/PoolTopUp';
 
 type SessionStatus = 'lobby' | 'question' | 'reveal' | 'ladder' | 'finished';
 type Role = 'admin' | 'guest' | 'spectator';
@@ -24,6 +25,7 @@ interface QuizSet {
   passcode: string | null;
   created_by: string | null;
   is_sandbox: boolean;
+  host_wallet_address: string | null;
 }
 interface LiveSession {
   id: string;
@@ -36,6 +38,7 @@ interface LiveQuestion {
   id: string; quiz_set_id: string; order_index: number;
   question: string; choice_a: string; choice_b: string; choice_c: string; choice_d: string;
   correct_choice: 'A' | 'B' | 'C' | 'D'; prize_amount: number;
+  image_url?: string | null;
 }
 interface LiveParticipant {
   id: string; session_id: string; user_id: string; display_name: string | null;
@@ -53,6 +56,7 @@ const CHOICE_COLORS = {
   C: 'bg-yellow-500 hover:bg-yellow-600 text-white',
   D: 'bg-green-500 hover:bg-green-600 text-white',
 };
+
 
 export default function LiveShow() {
   const { slug } = useParams<{ slug: string }>();
