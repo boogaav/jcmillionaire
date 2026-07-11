@@ -15,7 +15,7 @@
 // - "Correct:" may be "Answer:", "Ans:", "Correct answer:"; value is A|B|C|D or the full choice text.
 // - Blank lines separate questions; extra whitespace is tolerated.
 
-import { DEFAULT_PRIZE_LADDER } from './constants';
+import { LIVE_PRIZE_LADDER } from './constants';
 
 export interface ParsedLadderQuestion {
   order_index: number;
