@@ -86,12 +86,13 @@ export default function LiveCreate() {
       setPasscode(qset.passcode || '');
       const { data: qs } = await supabase
         .from('live_questions')
-        .select('question, choice_a, choice_b, choice_c, choice_d, correct_choice, prize_amount, order_index')
+        .select('question, choice_a, choice_b, choice_c, choice_d, correct_choice, prize_amount, order_index, image_url')
         .eq('quiz_set_id', qset.id)
         .order('order_index');
-      setRawText(stringifyExisting(qs || []));
+      setRawText(stringifyExisting((qs as any) || []));
       setLoading(false);
       hydratedRef.current = true;
+
     })();
   }, [isEdit, routeSlug, user, navigate]);
 
