@@ -7,6 +7,7 @@ import { GameProvider, useGame } from "@/contexts/GameContext";
 import { MiniKitProvider } from "@/components/MiniKitProvider";
 import { TonProvider } from "@/components/TonProvider";
 import BottomNav from "@/components/BottomNav";
+import XBanner from "@/components/XBanner";
 
 import AppHeader from "@/components/AppHeader";
 import LoadingScreen from "@/components/LoadingScreen";
@@ -62,7 +63,10 @@ const AppContent = () => {
 
   return (
     <>
-      <AppHeader />
+      <div className="sticky top-0 z-50">
+        <XBanner />
+        <AppHeader />
+      </div>
       
       <ReferralTracker />
       <Routes>
