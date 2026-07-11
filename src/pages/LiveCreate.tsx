@@ -236,7 +236,7 @@ export default function LiveCreate() {
       <div className="min-h-screen pt-6 pb-32 px-4 max-w-md mx-auto flex flex-col items-center gap-6">
         <div className="flex items-center gap-2 text-primary">
           <Radio className="w-6 h-6 animate-pulse" />
-          <h1 className="text-3xl font-display font-bold">{isEdit ? 'Edit Show' : 'Create a Live Show'}</h1>
+          <h1 className="text-3xl font-display font-bold">{isEdit ? 'Edit Show' : 'Host a Live Show'}</h1>
         </div>
         <p className="text-center text-muted-foreground">Sign in to {isEdit ? 'edit your show' : 'create your own 15-question live ladder'}.</p>
         <LoginButtons />
@@ -263,7 +263,7 @@ export default function LiveCreate() {
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-primary">
           <Radio className="w-6 h-6 animate-pulse" />
-          <h1 className="text-2xl font-display font-bold">{isEdit ? 'Edit Show' : 'Create a Live Show'}</h1>
+          <h1 className="text-2xl font-display font-bold">{isEdit ? 'Edit Show' : 'Host a Live Show'}</h1>
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           {savedAt && (

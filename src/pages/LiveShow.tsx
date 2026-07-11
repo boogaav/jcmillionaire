@@ -159,7 +159,7 @@ export default function LiveShow() {
       <div className="min-h-screen pt-6 pb-32 px-4 max-w-md mx-auto text-center space-y-4">
         <h1 className="text-2xl font-bold">Show not found</h1>
         <p className="text-muted-foreground">The link may be wrong or the show was deleted.</p>
-        <Link to="/live/new"><Button>Create your own show</Button></Link>
+        <Link to="/live/new"><Button>Host your own show</Button></Link>
       </div>
     );
   }
