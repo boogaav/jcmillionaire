@@ -414,6 +414,8 @@ export type Database = {
           created_by: string | null
           description: string | null
           id: string
+          is_locked: boolean
+          is_sandbox: boolean
           name: string
           passcode: string | null
           slug: string | null
@@ -424,6 +426,8 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          is_locked?: boolean
+          is_sandbox?: boolean
           name: string
           passcode?: string | null
           slug?: string | null
@@ -434,6 +438,8 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           id?: string
+          is_locked?: boolean
+          is_sandbox?: boolean
           name?: string
           passcode?: string | null
           slug?: string | null
