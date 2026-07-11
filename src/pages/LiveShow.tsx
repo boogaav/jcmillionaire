@@ -538,7 +538,11 @@ function AdminView({ quizSet, session, questions, participants, answers, adminUs
 
         {currentQ ? (
           <>
+            {currentQ.image_url && (
+              <img src={currentQ.image_url} alt="" className="w-full max-h-40 object-cover rounded-lg border border-border" />
+            )}
             <p className="font-semibold">{currentQ.question}</p>
+
             <div className="grid grid-cols-2 gap-2 text-sm">
               {CHOICES.map((c) => {
                 const isCorrect = c === currentQ.correct_choice;
