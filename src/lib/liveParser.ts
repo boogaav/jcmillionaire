@@ -61,6 +61,12 @@ function matchPrize(line: string): number | null {
   return Number.isFinite(n) && n >= 0 ? Math.floor(n) : null;
 }
 
+function matchImage(line: string): string | null {
+  const m = line.match(/^\s*(?:image|img|picture|photo)\s*[:=\-]\s*(\S+)/i);
+  return m ? m[1].trim() : null;
+}
+
+
 export function parseLadder(text: string): ParseResult {
   const errors: string[] = [];
   // Split into blocks on blank lines
