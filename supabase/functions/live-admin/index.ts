@@ -1,6 +1,6 @@
 // Admin-only control for the live game overlay.
-// Verifies the caller is an admin via public.is_admin(), then performs
-// the requested session state transition using the service role.
+// Verifies the caller is an admin (or the creator of the quiz set),
+// then performs the requested session state transition using the service role.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -51,7 +51,6 @@ serve(async (req) => {
     const { data: isAdmin, error: adminErr } = await supabase.rpc('is_admin', { _user_id: admin_user_id });
     if (adminErr) return json(500, { error: adminErr.message });
 
-    // Helper: authorize either global admin OR creator of the quiz set for this session/set
     const authorizeForQuizSet = async (quizSetId: string | null | undefined) => {
       if (isAdmin) return true;
       if (!quizSetId) return false;
@@ -63,17 +62,25 @@ serve(async (req) => {
       return !!qset && qset.created_by === admin_user_id;
     };
 
-    // ---- start_session: creates a new active session for a quiz set
+    // ---- start_session ---------------------------------------------------
     if (action === 'start_session') {
       if (!quiz_set_id) return json(400, { error: 'quiz_set_id required' });
       const allowed = await authorizeForQuizSet(quiz_set_id);
       if (!allowed) return json(403, { error: 'Unauthorized: must be admin or the creator of this quiz set' });
-      // Deactivate any previous active session for THIS quiz set only (allow concurrent shows across sets)
+
+      // Deactivate any previous active session for THIS quiz set only
       await supabase
         .from('live_sessions')
         .update({ is_active: false })
         .eq('is_active', true)
         .eq('quiz_set_id', quiz_set_id);
+
+      // Lock the quiz set so it can no longer be edited
+      await supabase
+        .from('live_quiz_sets')
+        .update({ is_locked: true })
+        .eq('id', quiz_set_id);
+
       const { data, error } = await supabase
         .from('live_sessions')
         .insert({ quiz_set_id, status: 'lobby', current_question_index: 0, is_active: true, created_by: admin_user_id })
@@ -85,7 +92,6 @@ serve(async (req) => {
 
     if (!session_id) return json(400, { error: 'session_id required' });
 
-    // Load session + questions for state transitions
     const { data: session, error: sErr } = await supabase
       .from('live_sessions')
       .select('*')
@@ -93,13 +99,8 @@ serve(async (req) => {
       .single();
     if (sErr || !session) return json(404, { error: 'session not found' });
 
-    // Authorize for all other actions: admin OR creator of this session's quiz set
     const canControl = await authorizeForQuizSet(session.quiz_set_id);
     if (!canControl) return json(403, { error: 'Unauthorized: must be admin or the creator of this quiz set' });
-      if (error) return json(500, { error: error.message });
-      return json(200, { session: data });
-    }
-
 
     if (action === 'start_question') {
       const { error } = await supabase
@@ -111,7 +112,6 @@ serve(async (req) => {
     }
 
     if (action === 'reveal_answer') {
-      // Load current question + answers + participants to settle ladder
       const { data: questions } = await supabase
         .from('live_questions')
         .select('*')
@@ -159,7 +159,6 @@ serve(async (req) => {
       if (error) return json(500, { error: error.message });
       return json(200, { ok: true });
     }
-
 
     if (action === 'next_question') {
       const { data: questions } = await supabase
