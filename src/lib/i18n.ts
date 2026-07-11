@@ -161,6 +161,7 @@ export const resources = {
       nav: {
         home: 'Home',
         game: 'Game',
+        live: 'Live',
         leaderboard: 'Leaderboard',
         profile: 'Profile',
       },
@@ -318,6 +319,7 @@ export const resources = {
       nav: {
         home: 'Inicio',
         game: 'Juego',
+        live: 'En vivo',
         leaderboard: 'Ranking',
         profile: 'Perfil',
       },
@@ -475,6 +477,7 @@ export const resources = {
       nav: {
         home: 'หน้าหลัก',
         game: 'เกม',
+        live: 'ไลฟ์',
         leaderboard: 'ผู้นำ',
         profile: 'โปรไฟล์',
       },
@@ -632,6 +635,7 @@ export const resources = {
       nav: {
         home: 'होम',
         game: 'गेम',
+        live: 'लाइव',
         leaderboard: 'लीडर',
         profile: 'प्रोफाइल',
       },
@@ -789,6 +793,7 @@ export const resources = {
       nav: {
         home: 'Beranda',
         game: 'Game',
+        live: 'Live',
         leaderboard: 'Peringkat',
         profile: 'Profil',
       },
