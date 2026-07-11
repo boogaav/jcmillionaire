@@ -87,6 +87,7 @@ export function parseLadder(text: string): ParseResult {
     };
     let correctRaw: string | null = null;
     let prize: number | null = null;
+    let imageUrl: string | null = null;
     const questionLines: string[] = [];
 
     for (const rawLine of lines) {
@@ -96,8 +97,11 @@ export function parseLadder(text: string): ParseResult {
       if (corr && correctRaw === null) { correctRaw = corr; continue; }
       const pz = matchPrize(rawLine);
       if (pz !== null && prize === null) { prize = pz; continue; }
+      const img = matchImage(rawLine);
+      if (img && imageUrl === null) { imageUrl = img; continue; }
       questionLines.push(rawLine);
     }
+
 
     const questionText = stripQuestionPrefix(questionLines.join(' ')).trim();
     if (!questionText) {
