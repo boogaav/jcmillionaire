@@ -79,7 +79,9 @@ const AppContent = () => {
         <Route path="/live" element={<Live />} />
         <Route path="/LIVE" element={<Live />} />
         <Route path="/live/new" element={<LiveCreate />} />
+        <Route path="/live/mine" element={<LiveMine />} />
         <Route path="/live/:slug" element={<LiveShow />} />
+        <Route path="/live/:slug/edit" element={<LiveCreate />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

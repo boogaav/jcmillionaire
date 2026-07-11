@@ -193,10 +193,15 @@ export default function Live() {
   return (
     <div className="min-h-screen pt-4 pb-32 px-4 max-w-2xl mx-auto">
       <Header role={role} session={session} participantCount={participants.filter(p => p.role !== 'admin').length} />
-      <div className="mb-4">
+      <div className="mb-4 grid grid-cols-2 gap-2">
         <a href="/live/new" className="block">
           <Button variant="outline" className="w-full gap-2 border-primary/40 text-primary hover:bg-primary/10">
-            <Plus className="w-4 h-4" /> Create your own live show
+            <Plus className="w-4 h-4" /> Create show
+          </Button>
+        </a>
+        <a href="/live/mine" className="block">
+          <Button variant="outline" className="w-full gap-2">
+            <Radio className="w-4 h-4" /> My shows
           </Button>
         </a>
       </div>
