@@ -215,7 +215,7 @@ export default function LiveShow() {
       </div>
 
       {/* Passcode gate for logged-in guests */}
-      {user && !isCreator && quizSet.passcode && !passcodeUnlocked && chosenRole !== 'spectator' && (
+      {user && !isHost && quizSet.passcode && !passcodeUnlocked && chosenRole !== 'spectator' && (
         <Card className="p-4 mb-4 space-y-3">
           <div className="flex items-center gap-2 font-semibold"><Lock className="w-4 h-4" /> Guest passcode required</div>
           <p className="text-xs text-muted-foreground">The host set a passcode to submit answers. You can still watch as a spectator.</p>
@@ -232,7 +232,7 @@ export default function LiveShow() {
         </Card>
       )}
 
-      {isCreator ? (
+      {isHost ? (
         <AdminView
           quizSet={quizSet}
           session={session}
@@ -252,9 +252,19 @@ export default function LiveShow() {
           userId={user?.id || ''}
         />
       )}
+
+      <div className="mt-4">
+        <PoolTopUp
+          quizSetId={quizSet.id}
+          hostAddress={quizSet.host_wallet_address}
+          isHost={isHost}
+          userId={user?.id || null}
+        />
+      </div>
     </div>
   );
 }
+
 
 /* ---------------- Player view ---------------- */
 function PlayerView({ role, session, questions, participants, answers, userId }: {
