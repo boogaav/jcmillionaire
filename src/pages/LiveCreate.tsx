@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Radio, Sparkles, AlertTriangle, Save, Trash2, Lock } from 'lucide-react';
+import { Radio, Sparkles, AlertTriangle, Save, Trash2, Lock, Image as ImageIcon, Upload, X } from 'lucide-react';
 
 import { supabase } from '@/integrations/supabase/client';
 import { useGame } from '@/contexts/GameContext';
@@ -27,13 +27,17 @@ function slugify(v: string) {
 
 function stringifyExisting(qs: Array<{
   question: string; choice_a: string; choice_b: string; choice_c: string; choice_d: string;
-  correct_choice: string; prize_amount: number; order_index: number;
+  correct_choice: string; prize_amount: number; order_index: number; image_url?: string | null;
 }>) {
   return qs
     .sort((a, b) => a.order_index - b.order_index)
-    .map((q, i) => `${i + 1}. ${q.question}\nA) ${q.choice_a}\nB) ${q.choice_b}\nC) ${q.choice_c}\nD) ${q.choice_d}\nCorrect: ${q.correct_choice}\nPrize: ${q.prize_amount}`)
+    .map((q, i) => {
+      const base = `${i + 1}. ${q.question}\nA) ${q.choice_a}\nB) ${q.choice_b}\nC) ${q.choice_c}\nD) ${q.choice_d}\nCorrect: ${q.correct_choice}\nPrize: ${q.prize_amount}`;
+      return q.image_url ? `${base}\nImage: ${q.image_url}` : base;
+    })
     .join('\n\n');
 }
+
 
 export default function LiveCreate() {
   const navigate = useNavigate();
@@ -51,6 +55,8 @@ export default function LiveCreate() {
   const [slugTouched, setSlugTouched] = useState(false);
   const [passcode, setPasscode] = useState('');
   const [rawText, setRawText] = useState('');
+  const [imageOverrides, setImageOverrides] = useState<Record<number, string>>({});
+  const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [savedAt, setSavedAt] = useState<number | null>(null);
   const [loading, setLoading] = useState(isEdit);
@@ -58,6 +64,7 @@ export default function LiveCreate() {
   const [editLocked, setEditLocked] = useState(false);
   const [notOwner, setNotOwner] = useState(false);
   const hydratedRef = useRef(false);
+
 
   // Load existing show for edit mode
   useEffect(() => {
@@ -79,12 +86,13 @@ export default function LiveCreate() {
       setPasscode(qset.passcode || '');
       const { data: qs } = await supabase
         .from('live_questions')
-        .select('question, choice_a, choice_b, choice_c, choice_d, correct_choice, prize_amount, order_index')
+        .select('question, choice_a, choice_b, choice_c, choice_d, correct_choice, prize_amount, order_index, image_url')
         .eq('quiz_set_id', qset.id)
         .order('order_index');
-      setRawText(stringifyExisting(qs || []));
+      setRawText(stringifyExisting((qs as any) || []));
       setLoading(false);
       hydratedRef.current = true;
+
     })();
   }, [isEdit, routeSlug, user, navigate]);
 
@@ -145,6 +153,13 @@ export default function LiveCreate() {
 
   const effectiveSlug = slug || (slugTouched ? '' : slugify(title));
 
+  // Merge image override into parsed row (override wins over Image: line)
+  const withImages = (rows: typeof parsed.questions) =>
+    rows.map((q, i) => ({
+      ...q,
+      image_url: (imageOverrides[i] ?? q.image_url ?? null) || null,
+    }));
+
   const submit = async () => {
     if (!user) return;
     if (!canSubmit) { toast.error('Fill in the form and paste 15 valid questions.'); return; }
@@ -162,7 +177,7 @@ export default function LiveCreate() {
         }
         // Replace questions
         await supabase.from('live_questions').delete().eq('quiz_set_id', editSetId);
-        const rows = parsed.questions.map((q) => ({ ...q, quiz_set_id: editSetId }));
+        const rows = withImages(parsed.questions).map((q) => ({ ...q, quiz_set_id: editSetId }));
         const { error: qsErr } = await supabase.from('live_questions').insert(rows);
         if (qsErr) { toast.error(qsErr.message); return; }
         toast.success('Show updated');
@@ -183,7 +198,7 @@ export default function LiveCreate() {
           toast.error(qErr?.message.includes('live_quiz_sets_slug_key') ? 'That URL is already taken.' : (qErr?.message || 'Failed to create show'));
           return;
         }
-        const rows = parsed.questions.map((q) => ({ ...q, quiz_set_id: qset.id }));
+        const rows = withImages(parsed.questions).map((q) => ({ ...q, quiz_set_id: qset.id }));
         const { error: qsErr } = await supabase.from('live_questions').insert(rows);
         if (qsErr) { toast.error(qsErr.message); return; }
         toast.success('Show created! Share the link with your audience.');
@@ -195,12 +210,33 @@ export default function LiveCreate() {
     }
   };
 
+  const uploadImage = async (idx: number, file: File) => {
+    if (!user) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error('Image must be under 5 MB'); return; }
+    if (!file.type.startsWith('image/')) { toast.error('Please pick an image file'); return; }
+    setUploadingIdx(idx);
+    try {
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
+      const path = `live/${user.id}/${Date.now()}-${idx}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('question-images')
+        .upload(path, file, { cacheControl: '3600', upsert: false });
+      if (upErr) { toast.error(upErr.message); return; }
+      const { data: pub } = supabase.storage.from('question-images').getPublicUrl(path);
+      setImageOverrides((m) => ({ ...m, [idx]: pub.publicUrl }));
+      toast.success('Image uploaded');
+    } finally {
+      setUploadingIdx(null);
+    }
+  };
+
+
   if (!user) {
     return (
       <div className="min-h-screen pt-6 pb-32 px-4 max-w-md mx-auto flex flex-col items-center gap-6">
         <div className="flex items-center gap-2 text-primary">
           <Radio className="w-6 h-6 animate-pulse" />
-          <h1 className="text-3xl font-display font-bold">{isEdit ? 'Edit Show' : 'Create a Live Show'}</h1>
+          <h1 className="text-3xl font-display font-bold">{isEdit ? 'Edit Show' : 'Host a Live Show'}</h1>
         </div>
         <p className="text-center text-muted-foreground">Sign in to {isEdit ? 'edit your show' : 'create your own 15-question live ladder'}.</p>
         <LoginButtons />
@@ -227,7 +263,7 @@ export default function LiveCreate() {
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 text-primary">
           <Radio className="w-6 h-6 animate-pulse" />
-          <h1 className="text-2xl font-display font-bold">{isEdit ? 'Edit Show' : 'Create a Live Show'}</h1>
+          <h1 className="text-2xl font-display font-bold">{isEdit ? 'Edit Show' : 'Host a Live Show'}</h1>
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           {savedAt && (
@@ -306,9 +342,10 @@ export default function LiveCreate() {
             className="font-mono text-sm"
           />
           <div className="text-xs text-muted-foreground space-y-1">
-            <p><strong>Format:</strong> question line, then 4 lines <code>A) B) C) D)</code>, then <code>Correct: B</code>. Optional <code>Prize: 100</code>. Separate questions with a blank line.</p>
+            <p><strong>Format:</strong> question line, then 4 lines <code>A) B) C) D)</code>, then <code>Correct: B</code>. Optional <code>Prize: 100</code> and <code>Image: https://…</code>. Separate questions with a blank line.</p>
             <p>Prize defaults to the standard $JC ladder if omitted.</p>
           </div>
+
 
           <div className="flex items-center justify-between text-sm">
             <span className={parsed.questions.length === 15 ? 'text-green-500 font-semibold' : 'text-muted-foreground'}>
@@ -326,6 +363,70 @@ export default function LiveCreate() {
             </ul>
           )}
         </Card>
+
+        {parsed.questions.length > 0 && (
+          <Card className="p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <ImageIcon className="w-4 h-4 text-primary" />
+              <label className="text-sm font-semibold">Question images (optional)</label>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Upload a picture or paste an image URL to show above the question during the live show.
+            </p>
+            <div className="space-y-3 max-h-[520px] overflow-auto pr-1">
+              {parsed.questions.map((q, i) => {
+                const url = imageOverrides[i] ?? q.image_url ?? '';
+                return (
+                  <div key={i} className="flex gap-3 items-start border border-border rounded-lg p-2">
+                    <div className="w-16 h-16 rounded-md bg-muted overflow-hidden flex items-center justify-center shrink-0">
+                      {url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={url} alt="" className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                      ) : (
+                        <ImageIcon className="w-5 h-5 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <p className="text-xs font-semibold truncate">Q{i + 1}. {q.question}</p>
+                      <div className="flex gap-1">
+                        <Input
+                          value={url}
+                          onChange={(e) => setImageOverrides((m) => ({ ...m, [i]: e.target.value }))}
+                          placeholder="https://…"
+                          className="h-8 text-xs"
+                        />
+                        <label className="cursor-pointer">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="sr-only"
+                            disabled={uploadingIdx !== null}
+                            onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage(i, f); e.currentTarget.value = ''; }}
+                          />
+                          <span className="inline-flex items-center gap-1 h-8 px-2 rounded-md border border-input bg-background text-xs hover:bg-accent">
+                            {uploadingIdx === i ? '…' : <Upload className="w-3 h-3" />}
+                          </span>
+                        </label>
+                        {url && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2"
+                            onClick={() => setImageOverrides((m) => ({ ...m, [i]: '' }))}
+                            title="Clear image"
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        )}
       </fieldset>
 
       <Button
@@ -340,3 +441,4 @@ export default function LiveCreate() {
     </div>
   );
 }
+

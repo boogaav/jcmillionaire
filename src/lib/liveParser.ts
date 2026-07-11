@@ -26,6 +26,7 @@ export interface ParsedLadderQuestion {
   choice_d: string;
   correct_choice: 'A' | 'B' | 'C' | 'D';
   prize_amount: number;
+  image_url?: string | null;
 }
 
 export interface ParseResult {
@@ -60,6 +61,12 @@ function matchPrize(line: string): number | null {
   return Number.isFinite(n) && n >= 0 ? Math.floor(n) : null;
 }
 
+function matchImage(line: string): string | null {
+  const m = line.match(/^\s*(?:image|img|picture|photo)\s*[:=\-]\s*(\S+)/i);
+  return m ? m[1].trim() : null;
+}
+
+
 export function parseLadder(text: string): ParseResult {
   const errors: string[] = [];
   // Split into blocks on blank lines
@@ -80,6 +87,7 @@ export function parseLadder(text: string): ParseResult {
     };
     let correctRaw: string | null = null;
     let prize: number | null = null;
+    let imageUrl: string | null = null;
     const questionLines: string[] = [];
 
     for (const rawLine of lines) {
@@ -89,8 +97,11 @@ export function parseLadder(text: string): ParseResult {
       if (corr && correctRaw === null) { correctRaw = corr; continue; }
       const pz = matchPrize(rawLine);
       if (pz !== null && prize === null) { prize = pz; continue; }
+      const img = matchImage(rawLine);
+      if (img && imageUrl === null) { imageUrl = img; continue; }
       questionLines.push(rawLine);
     }
+
 
     const questionText = stripQuestionPrefix(questionLines.join(' ')).trim();
     if (!questionText) {
@@ -131,9 +142,11 @@ export function parseLadder(text: string): ParseResult {
         choice_d: choices.D!,
         correct_choice: correct,
         prize_amount: prize ?? LIVE_PRIZE_LADDER[questions.length]?.prizeAmount ?? 0,
+        image_url: imageUrl,
       });
     }
   });
+
 
   if (questions.length !== 15 && errors.length === 0) {
     errors.push(`Expected 15 questions, parsed ${questions.length}. Separate questions with a blank line.`);

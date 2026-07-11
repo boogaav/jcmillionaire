@@ -1,8 +1,8 @@
-// /live/:slug — a single show's page. Creator sees admin controls, everyone else spectates/plays.
+// /live/:slug — a single show's page. Host sees admin controls, everyone else spectates/plays.
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Check, X, Trophy, Users, Eye, Play, SkipForward, Radio, Copy, Lock, Share2 } from 'lucide-react';
+import { Check, X, Trophy, Users, Eye, Play, SkipForward, Radio, Copy, Lock, Share2, Coins, Wallet, ExternalLink } from 'lucide-react';
 
 import { supabase } from '@/integrations/supabase/client';
 import { useGame } from '@/contexts/GameContext';
@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { LoginButtons } from '@/components/LoginButtons';
 import { formatJC } from '@/lib/constants';
 import { cn } from '@/lib/utils';
+import { PoolTopUp } from '@/components/live/PoolTopUp';
 
 type SessionStatus = 'lobby' | 'question' | 'reveal' | 'ladder' | 'finished';
 type Role = 'admin' | 'guest' | 'spectator';
@@ -24,6 +25,7 @@ interface QuizSet {
   passcode: string | null;
   created_by: string | null;
   is_sandbox: boolean;
+  host_wallet_address: string | null;
 }
 interface LiveSession {
   id: string;
@@ -36,6 +38,7 @@ interface LiveQuestion {
   id: string; quiz_set_id: string; order_index: number;
   question: string; choice_a: string; choice_b: string; choice_c: string; choice_d: string;
   correct_choice: 'A' | 'B' | 'C' | 'D'; prize_amount: number;
+  image_url?: string | null;
 }
 interface LiveParticipant {
   id: string; session_id: string; user_id: string; display_name: string | null;
@@ -54,6 +57,7 @@ const CHOICE_COLORS = {
   D: 'bg-green-500 hover:bg-green-600 text-white',
 };
 
+
 export default function LiveShow() {
   const { slug } = useParams<{ slug: string }>();
   const { state } = useGame();
@@ -70,9 +74,9 @@ export default function LiveShow() {
   const [passcodeUnlocked, setPasscodeUnlocked] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const isCreator = !!user && !!quizSet && quizSet.created_by === user.id;
+  const isHost = !!user && !!quizSet && quizSet.created_by === user.id;
   // Effective role in the room
-  const role: Role = isCreator
+  const role: Role = isHost
     ? 'admin'
     : chosenRole === 'spectator'
       ? 'spectator'
@@ -84,11 +88,12 @@ export default function LiveShow() {
     if (!slug) return;
     const { data: qset } = await supabase
       .from('live_quiz_sets')
-      .select('id, name, slug, passcode, created_by, is_sandbox')
+      .select('id, name, slug, passcode, created_by, is_sandbox, host_wallet_address')
       .eq('slug', slug)
       .maybeSingle();
     if (!qset) { setNotFound(true); setLoading(false); return; }
     setQuizSet(qset as QuizSet);
+
 
     const [{ data: qs }, { data: sess }] = await Promise.all([
       supabase.from('live_questions').select('*').eq('quiz_set_id', qset.id).order('order_index'),
@@ -154,7 +159,7 @@ export default function LiveShow() {
       <div className="min-h-screen pt-6 pb-32 px-4 max-w-md mx-auto text-center space-y-4">
         <h1 className="text-2xl font-bold">Show not found</h1>
         <p className="text-muted-foreground">The link may be wrong or the show was deleted.</p>
-        <Link to="/live/new"><Button>Create your own show</Button></Link>
+        <Link to="/live/new"><Button>Host your own show</Button></Link>
       </div>
     );
   }
@@ -210,7 +215,7 @@ export default function LiveShow() {
       </div>
 
       {/* Passcode gate for logged-in guests */}
-      {user && !isCreator && quizSet.passcode && !passcodeUnlocked && chosenRole !== 'spectator' && (
+      {user && !isHost && quizSet.passcode && !passcodeUnlocked && chosenRole !== 'spectator' && (
         <Card className="p-4 mb-4 space-y-3">
           <div className="flex items-center gap-2 font-semibold"><Lock className="w-4 h-4" /> Guest passcode required</div>
           <p className="text-xs text-muted-foreground">The host set a passcode to submit answers. You can still watch as a spectator.</p>
@@ -227,7 +232,7 @@ export default function LiveShow() {
         </Card>
       )}
 
-      {isCreator ? (
+      {isHost ? (
         <AdminView
           quizSet={quizSet}
           session={session}
@@ -247,9 +252,19 @@ export default function LiveShow() {
           userId={user?.id || ''}
         />
       )}
+
+      <div className="mt-4">
+        <PoolTopUp
+          quizSetId={quizSet.id}
+          hostAddress={quizSet.host_wallet_address}
+          isHost={isHost}
+          userId={user?.id || null}
+        />
+      </div>
     </div>
   );
 }
+
 
 /* ---------------- Player view ---------------- */
 function PlayerView({ role, session, questions, participants, answers, userId }: {
@@ -318,9 +333,15 @@ function PlayerView({ role, session, questions, participants, answers, userId }:
         <span className="text-primary font-bold">{formatJC(currentQ.prize_amount)} $JC</span>
       </div>
 
+      {currentQ.image_url && (
+        <div className="w-full rounded-2xl overflow-hidden border border-border max-h-64">
+          <img src={currentQ.image_url} alt="" className="w-full h-full object-cover max-h-64" />
+        </div>
+      )}
       <Card className="p-5 text-center">
         <p className="text-xl font-semibold leading-relaxed">{currentQ.question}</p>
       </Card>
+
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {CHOICES.map((c) => {
@@ -517,7 +538,11 @@ function AdminView({ quizSet, session, questions, participants, answers, adminUs
 
         {currentQ ? (
           <>
+            {currentQ.image_url && (
+              <img src={currentQ.image_url} alt="" className="w-full max-h-40 object-cover rounded-lg border border-border" />
+            )}
             <p className="font-semibold">{currentQ.question}</p>
+
             <div className="grid grid-cols-2 gap-2 text-sm">
               {CHOICES.map((c) => {
                 const isCorrect = c === currentQ.correct_choice;

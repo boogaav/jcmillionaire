@@ -70,19 +70,19 @@ export default function Live() {
       {/* Hero */}
       <section className="pt-8 pb-8 text-center space-y-4">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" /> New — Host your own show
+          <Sparkles className="w-3.5 h-3.5" /> New — Become a Host
         </div>
         <h1 className="text-4xl sm:text-5xl font-display font-bold leading-tight">
-          Run your own <span className="text-primary">Crypto Millionaire</span> show
+          Host your own <span className="text-primary">Crypto Millionaire</span> show
         </h1>
         <p className="text-muted-foreground max-w-lg mx-auto">
-          Paste 15 questions, share a link, and host a live Kahoot-style trivia night with your community.
-          Spectators can watch, guests can play for bragging rights.
+          Paste 15 questions, add images, top up the prize pool with SOL, and share a link.
+          Spectators can watch; guests can play for the pool.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
           <Link to="/live/new">
             <Button size="lg" className="w-full sm:w-auto gap-2">
-              <Plus className="w-4 h-4" /> Create a show
+              <Plus className="w-4 h-4" /> Host a show
             </Button>
           </Link>
           <Link to="/live/mine">
@@ -92,6 +92,7 @@ export default function Live() {
           </Link>
         </div>
       </section>
+
 
       {/* Live now */}
       <section className="space-y-3 mb-8">
