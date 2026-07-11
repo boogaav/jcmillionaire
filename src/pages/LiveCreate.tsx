@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Radio, Sparkles, AlertTriangle, Save, Trash2, Lock } from 'lucide-react';
+import { Radio, Sparkles, AlertTriangle, Save, Trash2, Lock, Image as ImageIcon, Upload, X } from 'lucide-react';
 
 import { supabase } from '@/integrations/supabase/client';
 import { useGame } from '@/contexts/GameContext';
@@ -27,13 +27,17 @@ function slugify(v: string) {
 
 function stringifyExisting(qs: Array<{
   question: string; choice_a: string; choice_b: string; choice_c: string; choice_d: string;
-  correct_choice: string; prize_amount: number; order_index: number;
+  correct_choice: string; prize_amount: number; order_index: number; image_url?: string | null;
 }>) {
   return qs
     .sort((a, b) => a.order_index - b.order_index)
-    .map((q, i) => `${i + 1}. ${q.question}\nA) ${q.choice_a}\nB) ${q.choice_b}\nC) ${q.choice_c}\nD) ${q.choice_d}\nCorrect: ${q.correct_choice}\nPrize: ${q.prize_amount}`)
+    .map((q, i) => {
+      const base = `${i + 1}. ${q.question}\nA) ${q.choice_a}\nB) ${q.choice_b}\nC) ${q.choice_c}\nD) ${q.choice_d}\nCorrect: ${q.correct_choice}\nPrize: ${q.prize_amount}`;
+      return q.image_url ? `${base}\nImage: ${q.image_url}` : base;
+    })
     .join('\n\n');
 }
+
 
 export default function LiveCreate() {
   const navigate = useNavigate();
