@@ -22,6 +22,7 @@ import Admin from "./pages/Admin";
 import Analytics from "./pages/Analytics";
 import About from "./pages/About";
 import Live from "./pages/Live";
+import LiveLegacy from "./pages/LiveLegacy";
 import LiveShow from "./pages/LiveShow";
 import LiveCreate from "./pages/LiveCreate";
 import LiveMine from "./pages/LiveMine";
@@ -84,6 +85,7 @@ const AppContent = () => {
         <Route path="/LIVE" element={<Live />} />
         <Route path="/live/new" element={<LiveCreate />} />
         <Route path="/live/mine" element={<LiveMine />} />
+        <Route path="/live/legacy" element={<LiveLegacy />} />
         <Route path="/live/:slug" element={<LiveShow />} />
         <Route path="/live/:slug/edit" element={<LiveCreate />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
