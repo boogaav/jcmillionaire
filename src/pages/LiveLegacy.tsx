@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { DEFAULT_PRIZE_LADDER, formatJC } from '@/lib/constants';
+import { LIVE_PRIZE_LADDER, formatJC } from '@/lib/constants';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Check, X, Trophy, Users, Eye, Play, SkipForward, Radio, Plus, Trash2 } from 'lucide-react';
