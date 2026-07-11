@@ -130,7 +130,7 @@ export function parseLadder(text: string): ParseResult {
         choice_c: choices.C!,
         choice_d: choices.D!,
         correct_choice: correct,
-        prize_amount: prize ?? DEFAULT_PRIZE_LADDER[questions.length]?.prizeAmount ?? 0,
+        prize_amount: prize ?? LIVE_PRIZE_LADDER[questions.length]?.prizeAmount ?? 0,
       });
     }
   });
