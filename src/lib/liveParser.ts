@@ -142,9 +142,11 @@ export function parseLadder(text: string): ParseResult {
         choice_d: choices.D!,
         correct_choice: correct,
         prize_amount: prize ?? LIVE_PRIZE_LADDER[questions.length]?.prizeAmount ?? 0,
+        image_url: imageUrl,
       });
     }
   });
+
 
   if (questions.length !== 15 && errors.length === 0) {
     errors.push(`Expected 15 questions, parsed ${questions.length}. Separate questions with a blank line.`);
