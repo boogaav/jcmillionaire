@@ -363,6 +363,70 @@ export default function LiveCreate() {
             </ul>
           )}
         </Card>
+
+        {parsed.questions.length > 0 && (
+          <Card className="p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <ImageIcon className="w-4 h-4 text-primary" />
+              <label className="text-sm font-semibold">Question images (optional)</label>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Upload a picture or paste an image URL to show above the question during the live show.
+            </p>
+            <div className="space-y-3 max-h-[520px] overflow-auto pr-1">
+              {parsed.questions.map((q, i) => {
+                const url = imageOverrides[i] ?? q.image_url ?? '';
+                return (
+                  <div key={i} className="flex gap-3 items-start border border-border rounded-lg p-2">
+                    <div className="w-16 h-16 rounded-md bg-muted overflow-hidden flex items-center justify-center shrink-0">
+                      {url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={url} alt="" className="w-full h-full object-cover" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                      ) : (
+                        <ImageIcon className="w-5 h-5 text-muted-foreground" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <p className="text-xs font-semibold truncate">Q{i + 1}. {q.question}</p>
+                      <div className="flex gap-1">
+                        <Input
+                          value={url}
+                          onChange={(e) => setImageOverrides((m) => ({ ...m, [i]: e.target.value }))}
+                          placeholder="https://…"
+                          className="h-8 text-xs"
+                        />
+                        <label className="cursor-pointer">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="sr-only"
+                            disabled={uploadingIdx !== null}
+                            onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadImage(i, f); e.currentTarget.value = ''; }}
+                          />
+                          <span className="inline-flex items-center gap-1 h-8 px-2 rounded-md border border-input bg-background text-xs hover:bg-accent">
+                            {uploadingIdx === i ? '…' : <Upload className="w-3 h-3" />}
+                          </span>
+                        </label>
+                        {url && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2"
+                            onClick={() => setImageOverrides((m) => ({ ...m, [i]: '' }))}
+                            title="Clear image"
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        )}
       </fieldset>
 
       <Button
@@ -377,3 +441,4 @@ export default function LiveCreate() {
     </div>
   );
 }
+
