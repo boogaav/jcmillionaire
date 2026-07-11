@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Gamepad2, Trophy, User, BookOpen, Radio } from 'lucide-react';
+import { Gamepad2, User, BookOpen, Radio } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface NavItemProps {
@@ -41,7 +41,6 @@ const BottomNav: React.FC = () => {
     { icon: <BookOpen className="w-5 h-5" />, label: 'Story', path: '/about' },
     { icon: <Gamepad2 className="w-5 h-5" />, label: 'Game', path: '/' },
     { icon: <Radio className="w-5 h-5" />, label: t('nav.live'), path: '/live' },
-    { icon: <Trophy className="w-5 h-5" />, label: t('nav.leaderboard'), path: '/leaderboard' },
     { icon: <User className="w-5 h-5" />, label: t('nav.profile'), path: '/profile' },
   ];
 
