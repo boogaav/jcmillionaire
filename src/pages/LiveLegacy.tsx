@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { DEFAULT_PRIZE_LADDER, formatJC } from '@/lib/constants';
+import { LIVE_PRIZE_LADDER, formatJC } from '@/lib/constants';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Check, X, Trophy, Users, Eye, Play, SkipForward, Radio, Plus, Trash2 } from 'lucide-react';
@@ -634,7 +634,7 @@ function QuizSetBuilder({ quizSets, reload }: { quizSets: LiveQuizSet[]; reload:
   const addQuestion = async () => {
     if (!editSetId) return;
     const nextIdx = setQuestions.length;
-    const defaultPrize = DEFAULT_PRIZE_LADDER[nextIdx]?.prizeAmount || 100;
+    const defaultPrize = LIVE_PRIZE_LADDER[nextIdx]?.prizeAmount || 100;
     await supabase.from('live_questions').insert({
       quiz_set_id: editSetId,
       order_index: nextIdx,
