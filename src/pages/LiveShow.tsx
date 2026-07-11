@@ -333,9 +333,15 @@ function PlayerView({ role, session, questions, participants, answers, userId }:
         <span className="text-primary font-bold">{formatJC(currentQ.prize_amount)} $JC</span>
       </div>
 
+      {currentQ.image_url && (
+        <div className="w-full rounded-2xl overflow-hidden border border-border max-h-64">
+          <img src={currentQ.image_url} alt="" className="w-full h-full object-cover max-h-64" />
+        </div>
+      )}
       <Card className="p-5 text-center">
         <p className="text-xl font-semibold leading-relaxed">{currentQ.question}</p>
       </Card>
+
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {CHOICES.map((c) => {
