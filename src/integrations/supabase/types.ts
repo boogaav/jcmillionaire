@@ -358,6 +358,53 @@ export type Database = {
           },
         ]
       }
+      live_pool_topups: {
+        Row: {
+          amount_lamports: number
+          amount_sol: number
+          created_at: string
+          created_by: string | null
+          from_address: string
+          id: string
+          note: string | null
+          quiz_set_id: string
+          to_address: string
+          tx_signature: string
+        }
+        Insert: {
+          amount_lamports: number
+          amount_sol: number
+          created_at?: string
+          created_by?: string | null
+          from_address: string
+          id?: string
+          note?: string | null
+          quiz_set_id: string
+          to_address: string
+          tx_signature: string
+        }
+        Update: {
+          amount_lamports?: number
+          amount_sol?: number
+          created_at?: string
+          created_by?: string | null
+          from_address?: string
+          id?: string
+          note?: string | null
+          quiz_set_id?: string
+          to_address?: string
+          tx_signature?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_pool_topups_quiz_set_id_fkey"
+            columns: ["quiz_set_id"]
+            isOneToOne: false
+            referencedRelation: "live_quiz_sets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       live_questions: {
         Row: {
           choice_a: string
@@ -367,6 +414,7 @@ export type Database = {
           correct_choice: string
           created_at: string
           id: string
+          image_url: string | null
           order_index: number
           prize_amount: number
           question: string
@@ -380,6 +428,7 @@ export type Database = {
           correct_choice: string
           created_at?: string
           id?: string
+          image_url?: string | null
           order_index: number
           prize_amount?: number
           question: string
@@ -393,6 +442,7 @@ export type Database = {
           correct_choice?: string
           created_at?: string
           id?: string
+          image_url?: string | null
           order_index?: number
           prize_amount?: number
           question?: string
@@ -413,6 +463,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
+          host_wallet_address: string | null
           id: string
           is_locked: boolean
           is_sandbox: boolean
@@ -425,6 +476,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          host_wallet_address?: string | null
           id?: string
           is_locked?: boolean
           is_sandbox?: boolean
@@ -437,6 +489,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          host_wallet_address?: string | null
           id?: string
           is_locked?: boolean
           is_sandbox?: boolean
