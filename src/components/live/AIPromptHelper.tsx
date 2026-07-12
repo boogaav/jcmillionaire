@@ -69,6 +69,28 @@ export const AIPromptHelper: React.FC<AIPromptHelperProps> = ({ onInsert }) => {
     }
   };
 
+  const handlePasteFromClipboard = async () => {
+    try {
+      const raw = await navigator.clipboard.readText();
+      if (!raw || !raw.trim()) {
+        toast.error('Clipboard is empty');
+        return;
+      }
+      const cleaned = cleanAIResponse(raw);
+      const { questions, errors } = parseLadder(cleaned);
+      onInsert(cleaned);
+      if (questions.length === 15 && errors.length === 0) {
+        toast.success('Pasted 15 questions from clipboard');
+      } else if (questions.length > 0) {
+        toast.warning(`Pasted ${questions.length}/15 questions — check the highlighted issues below`);
+      } else {
+        toast.error('Could not detect any questions in that clipboard content');
+      }
+    } catch {
+      toast.error('Clipboard access denied. Paste manually into the box below.');
+    }
+  };
+
   return (
     <Card className="p-4 space-y-3 border-primary/40 bg-primary/5">
       <button
