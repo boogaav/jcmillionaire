@@ -156,9 +156,15 @@ export const AIPromptHelper: React.FC<AIPromptHelperProps> = ({ onInsert }) => {
             </a>
           </div>
 
-          <p className="text-xs text-muted-foreground">
-            Once the AI replies, copy its whole response and paste it into the "Paste your 15 questions" box below.
-          </p>
+          <div className="pt-2 border-t border-border/60 space-y-2">
+            <p className="text-xs text-muted-foreground">
+              Once the AI replies, copy its full response, then click below to auto-fill the 15 questions.
+            </p>
+            <Button size="sm" variant="gold" onClick={handlePasteFromClipboard} className="w-full gap-1.5">
+              <ClipboardPaste className="w-4 h-4" />
+              Paste AI response & auto-fill questions
+            </Button>
+          </div>
         </div>
       )}
     </Card>
