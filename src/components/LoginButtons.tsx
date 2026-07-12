@@ -336,6 +336,23 @@ export const LoginButtons: React.FC<LoginButtonsProps> = ({ compact = false }) =
             <Button
               variant="gold"
               size="xl"
+              className="w-full bg-gradient-to-r from-[#627EEA] to-[#3C5FE0] hover:from-[#4B6EE0] hover:to-[#2E52D6] text-white border-0"
+              onClick={handleEthLogin}
+              disabled={isEthLogging}
+            >
+              {isEthLogging ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  <EthereumIcon size={20} />
+                  Login with Ethereum
+                </>
+              )}
+            </Button>
+
+            <Button
+              variant="gold"
+              size="xl"
               className="w-full bg-gradient-to-r from-[#9945FF] to-[#14F195] hover:from-[#8835EF] hover:to-[#0DE185] text-white border-0"
               onClick={handleSolanaLogin}
               disabled={isSolanaLogging}
