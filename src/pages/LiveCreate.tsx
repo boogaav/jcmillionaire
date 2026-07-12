@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { LoginButtons } from '@/components/LoginButtons';
 import { parseLadder, EXAMPLE_LADDER } from '@/lib/liveParser';
+import { AIPromptHelper } from '@/components/live/AIPromptHelper';
 
 function slugify(v: string) {
   return v
@@ -324,6 +325,8 @@ export default function LiveCreate() {
             <p className="text-xs text-muted-foreground mt-1">Spectators can always watch. Guests need this code to submit answers.</p>
           </div>
         </Card>
+
+        <AIPromptHelper />
 
         <Card className="p-4 space-y-3">
           <div className="flex items-center justify-between gap-2">
