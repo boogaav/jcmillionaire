@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
 import { LoginButtons } from '@/components/LoginButtons';
 import { parseLadder, EXAMPLE_LADDER } from '@/lib/liveParser';
+import { AIPromptHelper } from '@/components/live/AIPromptHelper';
 
 function slugify(v: string) {
   return v
