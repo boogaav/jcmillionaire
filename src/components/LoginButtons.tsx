@@ -223,6 +223,66 @@ export const LoginButtons: React.FC<LoginButtonsProps> = ({ compact = false }) =
     }
   };
 
+  const handleEthLogin = async () => {
+    if (!isEthereumAvailable()) {
+      toast.error('Ethereum wallet not found. Please install MetaMask.');
+      return;
+    }
+    setIsEthLogging(true);
+    try {
+      const result = await authenticateWithEthereum();
+      if (!result.success || !result.user) {
+        throw new Error(result.error || 'Ethereum authentication failed');
+      }
+      const userData = {
+        id: result.user.id,
+        verification_level: result.user.verification_level,
+        wallet_address: result.user.wallet_address,
+        created_at: result.user.created_at,
+      };
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('username')
+        .eq('id', result.user.id)
+        .maybeSingle();
+
+      const finishLogin = async (username?: string) => {
+        localStorage.setItem('jc_wallet_address', userData.wallet_address);
+        localStorage.setItem('jc_wallet_type', 'ethereum');
+        const userObj = {
+          id: userData.id,
+          verificationLevel: userData.verification_level as 'device' | 'orb',
+          nullifierHash: `eth_${userData.wallet_address}`,
+          createdAt: userData.created_at,
+          username,
+        };
+        persistUser(userObj);
+        await linkPendingReferralToUser(userObj.id);
+        dispatch({ type: 'SET_USER', payload: userObj });
+        setIsOpen(false);
+      };
+
+      if (existingUser?.username) {
+        await finishLogin(existingUser.username);
+      } else {
+        setPendingUserId(result.user.id);
+        setPendingWalletType('eth');
+        localStorage.setItem('jc_wallet_address', userData.wallet_address);
+        localStorage.setItem('jc_wallet_type', 'ethereum');
+        localStorage.setItem('jc_pending_user_data', JSON.stringify({ ...userData, walletType: 'eth' }));
+        setIsEthLogging(false);
+        setIsOpen(false);
+        setShowUsernamePrompt(true);
+      }
+    } catch (error) {
+      console.error('Ethereum login failed:', error);
+      toast.error(error instanceof Error ? error.message : 'Ethereum login failed');
+    } finally {
+      setIsEthLogging(false);
+    }
+  };
+
+
   return (
     <>
       {showUsernamePrompt && pendingUserId && (
