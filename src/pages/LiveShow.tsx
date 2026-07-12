@@ -14,6 +14,7 @@ import { LoginButtons } from '@/components/LoginButtons';
 import { formatJC } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { PoolTopUp } from '@/components/live/PoolTopUp';
+import { playNewQuestion, playWaiting, playCorrect, playWrong } from '@/lib/liveSounds';
 
 type SessionStatus = 'lobby' | 'question' | 'reveal' | 'ladder' | 'finished';
 type Role = 'admin' | 'guest' | 'spectator';
@@ -291,8 +292,22 @@ function PlayerView({ role, session, questions, participants, answers, userId }:
       session_id: session.id, question_id: currentQ.id, user_id: userId, choice, is_correct: isCorrect,
     });
     if (error) { toast.error('Failed to submit answer'); return; }
+    playWaiting();
     toast.success('Answer locked in!');
   };
+
+  // New-question chime: fires when the visible question changes while in "question" status.
+  const qKey = currentQ && session.status === 'question' ? `${session.id}:${currentQ.id}` : null;
+  useEffect(() => { if (qKey) playNewQuestion(); }, [qKey]);
+
+  // Reveal chime for this player based on their own answer correctness.
+  const revealKey = currentQ && session.status === 'reveal' ? `${session.id}:${currentQ.id}` : null;
+  useEffect(() => {
+    if (!revealKey || !currentQ) return;
+    const mine = answers.find((a) => a.user_id === userId && a.question_id === currentQ.id);
+    if (!mine) return;
+    if (mine.is_correct) playCorrect(); else playWrong();
+  }, [revealKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (session.status === 'lobby') {
     return (
