@@ -33,9 +33,10 @@ export const LoginButtons: React.FC<LoginButtonsProps> = ({ compact = false }) =
   const [isSolanaLogging, setIsSolanaLogging] = useState(false);
   const [isWorldLogging, setIsWorldLogging] = useState(false);
   const [isTonLogging, setIsTonLogging] = useState(false);
+  const [isEthLogging, setIsEthLogging] = useState(false);
   const [showUsernamePrompt, setShowUsernamePrompt] = useState(false);
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
-  const [pendingWalletType, setPendingWalletType] = useState<'solana' | 'ton'>('solana');
+  const [pendingWalletType, setPendingWalletType] = useState<'solana' | 'ton' | 'eth'>('solana');
 
   const handleWorldLogin = async () => {
     setIsWorldLogging(true);
