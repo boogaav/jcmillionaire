@@ -133,7 +133,7 @@ export const LoginButtons: React.FC<LoginButtonsProps> = ({ compact = false }) =
     const pendingData = localStorage.getItem('jc_pending_user_data');
     if (pendingData) {
       const userData = JSON.parse(pendingData);
-      const walletType: 'solana' | 'ton' = userData.walletType || 'solana';
+      const walletType: 'solana' | 'ton' | 'eth' = userData.walletType || 'solana';
       localStorage.removeItem('jc_pending_user_data');
       const userObj = {
         id: userData.id,
