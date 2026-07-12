@@ -1,11 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { Bot, Copy, ChevronDown, ChevronUp, Check, ExternalLink } from 'lucide-react';
+import { Bot, Copy, ChevronDown, ChevronUp, Check, ExternalLink, ClipboardPaste } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { LIVE_PRIZE_LADDER } from '@/lib/constants';
+import { cleanAIResponse, parseLadder } from '@/lib/liveParser';
+
+interface AIPromptHelperProps {
+  onInsert: (text: string) => void;
+}
 
 
 const PRIZE_LIST = LIVE_PRIZE_LADDER
@@ -46,7 +51,7 @@ ${PRIZE_LIST}
 Begin now.`;
 }
 
-export const AIPromptHelper: React.FC = () => {
+export const AIPromptHelper: React.FC<AIPromptHelperProps> = ({ onInsert }) => {
   const [open, setOpen] = useState(false);
   const [topic, setTopic] = useState('');
   const [copied, setCopied] = useState(false);
@@ -61,6 +66,28 @@ export const AIPromptHelper: React.FC = () => {
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.error('Could not copy to clipboard');
+    }
+  };
+
+  const handlePasteFromClipboard = async () => {
+    try {
+      const raw = await navigator.clipboard.readText();
+      if (!raw || !raw.trim()) {
+        toast.error('Clipboard is empty');
+        return;
+      }
+      const cleaned = cleanAIResponse(raw);
+      const { questions, errors } = parseLadder(cleaned);
+      onInsert(cleaned);
+      if (questions.length === 15 && errors.length === 0) {
+        toast.success('Pasted 15 questions from clipboard');
+      } else if (questions.length > 0) {
+        toast.warning(`Pasted ${questions.length}/15 questions — check the highlighted issues below`);
+      } else {
+        toast.error('Could not detect any questions in that clipboard content');
+      }
+    } catch {
+      toast.error('Clipboard access denied. Paste manually into the box below.');
     }
   };
 
@@ -129,9 +156,15 @@ export const AIPromptHelper: React.FC = () => {
             </a>
           </div>
 
-          <p className="text-xs text-muted-foreground">
-            Once the AI replies, copy its whole response and paste it into the "Paste your 15 questions" box below.
-          </p>
+          <div className="pt-2 border-t border-border/60 space-y-2">
+            <p className="text-xs text-muted-foreground">
+              Once the AI replies, copy its full response, then click below to auto-fill the 15 questions.
+            </p>
+            <Button size="sm" variant="gold" onClick={handlePasteFromClipboard} className="w-full gap-1.5">
+              <ClipboardPaste className="w-4 h-4" />
+              Paste AI response & auto-fill questions
+            </Button>
+          </div>
         </div>
       )}
     </Card>

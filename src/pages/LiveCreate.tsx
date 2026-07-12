@@ -326,7 +326,7 @@ export default function LiveCreate() {
           </div>
         </Card>
 
-        <AIPromptHelper />
+        <AIPromptHelper onInsert={(text) => setRawText(text)} />
 
         <Card className="p-4 space-y-3">
           <div className="flex items-center justify-between gap-2">

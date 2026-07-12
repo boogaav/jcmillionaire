@@ -67,11 +67,20 @@ function matchImage(line: string): string | null {
 }
 
 
+export function cleanAIResponse(text: string): string {
+  let t = (text || '').replace(/\r\n/g, '\n').trim();
+  // Strip surrounding markdown code fences (```lang ... ```)
+  t = t.replace(/^```[a-zA-Z0-9]*\s*\n?/, '').replace(/\n?```\s*$/, '');
+  // Strip common AI preambles like "Sure! Here are ..." up to the first "1." line
+  const firstQ = t.search(/^\s*(?:1|Q\s*1|Question\s*1)[.)\-:]/m);
+  if (firstQ > 0) t = t.slice(firstQ);
+  return t.trim();
+}
+
 export function parseLadder(text: string): ParseResult {
   const errors: string[] = [];
   // Split into blocks on blank lines
-  const blocks = text
-    .replace(/\r\n/g, '\n')
+  const blocks = cleanAIResponse(text)
     .split(/\n\s*\n/)
     .map((b) => b.trim())
     .filter(Boolean);
