@@ -1,11 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { Bot, Copy, ChevronDown, ChevronUp, Check, ExternalLink } from 'lucide-react';
+import { Bot, Copy, ChevronDown, ChevronUp, Check, ExternalLink, ClipboardPaste } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { LIVE_PRIZE_LADDER } from '@/lib/constants';
+import { cleanAIResponse, parseLadder } from '@/lib/liveParser';
+
+interface AIPromptHelperProps {
+  onInsert: (text: string) => void;
+}
 
 
 const PRIZE_LIST = LIVE_PRIZE_LADDER
