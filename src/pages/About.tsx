@@ -201,7 +201,7 @@ const About: React.FC = () => {
 
         {/* Play Game Button */}
         <section className="flex justify-center px-4 py-8">
-          <Button variant="outline" size="xl" className="gap-2" onClick={() => navigate('/')}>
+          <Button variant="outline" size="xl" className="gap-2" onClick={() => navigate('/game')}>
             <Gamepad2 className="w-5 h-5" />
             Play the Game
           </Button>

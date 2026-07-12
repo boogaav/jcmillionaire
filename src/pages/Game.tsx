@@ -172,7 +172,7 @@ const Game: React.FC = () => {
         const { error: attemptError } = await incrementAttemptsUsed(user.id);
         if (attemptError) {
           console.error('Failed to consume attempt:', attemptError);
-          navigate('/');
+          navigate('/game');
           return;
         }
 
@@ -511,7 +511,7 @@ const Game: React.FC = () => {
         <div className="text-center space-y-4">
           <h2 className="text-2xl font-display font-bold">No Questions Available</h2>
           <p className="text-muted-foreground">{questionLoadError}</p>
-          <Button variant="outline" onClick={() => navigate('/')}>
+          <Button variant="outline" onClick={() => navigate('/game')}>
             Go Home
           </Button>
         </div>
@@ -569,7 +569,7 @@ const Game: React.FC = () => {
           {earnedAmount > 0 ? 'Claim Reward' : 'View Results'}
         </Button>
 
-        <Button variant="ghost" onClick={() => navigate('/')}>
+        <Button variant="ghost" onClick={() => navigate('/game')}>
           Back to Home
         </Button>
       </div>
@@ -609,7 +609,7 @@ const Game: React.FC = () => {
           </div>
         </div>
         
-        <Button variant="gold" size="lg" onClick={() => navigate('/')}>
+        <Button variant="gold" size="lg" onClick={() => navigate('/game')}>
           Back to Home
         </Button>
       </div>

@@ -262,7 +262,7 @@ const Result: React.FC = () => {
           variant="secondary"
           size="lg"
           className="w-full"
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/game')}
         >
           <Home className="w-5 h-5" />
           Back to Home

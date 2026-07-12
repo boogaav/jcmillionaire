@@ -39,13 +39,13 @@ const BottomNav: React.FC = () => {
 
   const navItems = [
     { icon: <BookOpen className="w-5 h-5" />, label: 'Story', path: '/about' },
-    { icon: <Gamepad2 className="w-5 h-5" />, label: 'Game', path: '/' },
-    { icon: <Radio className="w-5 h-5" />, label: t('nav.live'), path: '/live' },
+    { icon: <Gamepad2 className="w-5 h-5" />, label: 'Game', path: '/game' },
+    { icon: <Radio className="w-5 h-5" />, label: t('nav.live'), path: '/' },
     { icon: <User className="w-5 h-5" />, label: t('nav.profile'), path: '/profile' },
   ];
 
-  // Don't show on game or result pages
-  const hiddenPaths = ['/game', '/result', '/verify'];
+  // Don't show on active gameplay/result/verify pages
+  const hiddenPaths = ['/play', '/result', '/verify'];
   if (hiddenPaths.some(p => location.pathname.startsWith(p))) {
     return null;
   }
