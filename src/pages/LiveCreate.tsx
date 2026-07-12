@@ -326,7 +326,6 @@ export default function LiveCreate() {
           </div>
         </Card>
 
-        <Card className="p-4 space-y-3">
         <AIPromptHelper />
 
         <Card className="p-4 space-y-3">
