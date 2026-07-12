@@ -32,7 +32,7 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const LIVE_SUBDOMAIN_HOSTS = ['app.jackiechain.world'];
+
 
 const AppContent = () => {
   const { isLoading } = useGame();
