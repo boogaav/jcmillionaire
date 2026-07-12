@@ -327,6 +327,9 @@ export default function LiveCreate() {
         </Card>
 
         <Card className="p-4 space-y-3">
+        <AIPromptHelper />
+
+        <Card className="p-4 space-y-3">
           <div className="flex items-center justify-between gap-2">
             <label className="text-sm font-semibold">Paste your 15 questions</label>
             {!isEdit && (
