@@ -77,7 +77,7 @@ const Admin: React.FC = () => {
   useEffect(() => {
     if (user && isAdmin === false) {
       toast.error('Access denied. Admin only.');
-      navigate('/');
+      navigate('/game');
     }
   }, [user, isAdmin, navigate]);
 
@@ -374,7 +374,7 @@ const Admin: React.FC = () => {
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-4 border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
+          <Button variant="ghost" size="sm" onClick={() => navigate('/game')}>
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <Shield className="w-6 h-6 text-primary" />

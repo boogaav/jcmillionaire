@@ -274,7 +274,7 @@ const Profile: React.FC = () => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/game')}
         >
           <ArrowLeft className="w-5 h-5" />
         </Button>
@@ -411,7 +411,7 @@ const Profile: React.FC = () => {
           {runHistory.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground">No games played yet.</p>
-              <Button variant="gold" className="mt-4" onClick={() => navigate('/')}>
+              <Button variant="gold" className="mt-4" onClick={() => navigate('/game')}>
                 Start Playing
               </Button>
             </div>

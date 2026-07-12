@@ -91,7 +91,7 @@ const Verify: React.FC = () => {
       }, 1500);
     } else {
       setTimeout(() => {
-        navigate('/');
+        navigate('/game');
       }, 1500);
     }
   };
@@ -219,11 +219,11 @@ const Verify: React.FC = () => {
   };
 
   const handleNotificationComplete = () => {
-    navigate('/');
+    navigate('/game');
   };
 
   const handleNotificationSkip = () => {
-    navigate('/');
+    navigate('/game');
   };
 
   // Show username prompt dialog
@@ -279,7 +279,7 @@ const Verify: React.FC = () => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/game')}
           className="text-muted-foreground"
         >
           <ArrowLeft className="w-5 h-5" />
