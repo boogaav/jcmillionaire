@@ -39,15 +39,8 @@ const AppContent = () => {
   const location = useLocation();
   const isBroadcast = location.pathname.toLowerCase().startsWith('/live/broadcast');
 
-  // On the dedicated Live subdomain, force root → /live
-  if (
-    typeof window !== 'undefined' &&
-    LIVE_SUBDOMAIN_HOSTS.includes(window.location.hostname) &&
-    location.pathname === '/'
-  ) {
-    window.location.replace('/live');
-    return <LoadingScreen />;
-  }
+  // Live is now the root landing — no forced redirect needed.
+
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -71,10 +64,11 @@ const AppContent = () => {
       
       <ReferralTracker />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Live />} />
         <Route path="/about" element={<About />} />
         <Route path="/verify" element={<Verify />} />
-        <Route path="/game" element={<Game />} />
+        <Route path="/game" element={<Home />} />
+        <Route path="/play" element={<Game />} />
         <Route path="/result" element={<Result />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
@@ -83,6 +77,7 @@ const AppContent = () => {
         <Route path="/welcome" element={<Verify />} />
         <Route path="/live" element={<Live />} />
         <Route path="/LIVE" element={<Live />} />
+        <Route path="/play/legacy" element={<Game />} />
         <Route path="/live/new" element={<LiveCreate />} />
         <Route path="/live/mine" element={<LiveMine />} />
         <Route path="/live/legacy" element={<LiveLegacy />} />

@@ -70,7 +70,7 @@ const Home: React.FC = () => {
       return;
     }
     if (canPlay) {
-      navigate('/game');
+      navigate('/play');
     }
   };
 
