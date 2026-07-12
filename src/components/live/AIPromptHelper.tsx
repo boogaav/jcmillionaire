@@ -7,9 +7,6 @@ import { Card } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { LIVE_PRIZE_LADDER } from '@/lib/constants';
 
-interface AIPromptHelperProps {
-  onInsert: (text: string) => void;
-}
 
 const PRIZE_LIST = LIVE_PRIZE_LADDER
   .map((p) => `Q${p.questionNumber}: ${p.prizeAmount.toLocaleString()} $JC${p.isSafeHaven ? ' (safe haven)' : ''}`)
