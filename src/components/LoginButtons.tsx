@@ -7,12 +7,14 @@ import { Button } from '@/components/ui/button';
 import { SolanaIcon } from '@/components/icons/SolanaIcon';
 import { WorldIdIcon } from '@/components/icons/WorldIdIcon';
 import { TonIcon } from '@/components/icons/TonIcon';
+import { EthereumIcon } from '@/components/icons/EthereumIcon';
 import { UsernamePrompt } from '@/components/UsernamePrompt';
 import { useGame } from '@/contexts/GameContext';
 import { ChevronRight, Loader2, LogIn, X } from 'lucide-react';
 import { isPhantomAvailable, authenticateWithPhantom } from '@/lib/phantomWallet';
 import { isInWorldApp, authenticateWithWallet } from '@/lib/minikit';
 import { authenticateWithTon } from '@/lib/tonWallet';
+import { isEthereumAvailable, authenticateWithEthereum } from '@/lib/ethWallet';
 import { persistUser } from '@/lib/userService';
 import { linkPendingReferralToUser } from '@/hooks/useReferralTracking';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,9 +33,10 @@ export const LoginButtons: React.FC<LoginButtonsProps> = ({ compact = false }) =
   const [isSolanaLogging, setIsSolanaLogging] = useState(false);
   const [isWorldLogging, setIsWorldLogging] = useState(false);
   const [isTonLogging, setIsTonLogging] = useState(false);
+  const [isEthLogging, setIsEthLogging] = useState(false);
   const [showUsernamePrompt, setShowUsernamePrompt] = useState(false);
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
-  const [pendingWalletType, setPendingWalletType] = useState<'solana' | 'ton'>('solana');
+  const [pendingWalletType, setPendingWalletType] = useState<'solana' | 'ton' | 'eth'>('solana');
 
   const handleWorldLogin = async () => {
     setIsWorldLogging(true);
@@ -130,7 +133,7 @@ export const LoginButtons: React.FC<LoginButtonsProps> = ({ compact = false }) =
     const pendingData = localStorage.getItem('jc_pending_user_data');
     if (pendingData) {
       const userData = JSON.parse(pendingData);
-      const walletType: 'solana' | 'ton' = userData.walletType || 'solana';
+      const walletType: 'solana' | 'ton' | 'eth' = userData.walletType || 'solana';
       localStorage.removeItem('jc_pending_user_data');
       const userObj = {
         id: userData.id,
@@ -151,7 +154,7 @@ export const LoginButtons: React.FC<LoginButtonsProps> = ({ compact = false }) =
     const pendingData = localStorage.getItem('jc_pending_user_data');
     if (pendingData) {
       const userData = JSON.parse(pendingData);
-      const walletType: 'solana' | 'ton' = userData.walletType || 'solana';
+      const walletType: 'solana' | 'ton' | 'eth' = userData.walletType || 'solana';
       localStorage.removeItem('jc_pending_user_data');
       const userObj = {
         id: userData.id,
@@ -220,6 +223,66 @@ export const LoginButtons: React.FC<LoginButtonsProps> = ({ compact = false }) =
     }
   };
 
+  const handleEthLogin = async () => {
+    if (!isEthereumAvailable()) {
+      toast.error('Ethereum wallet not found. Please install MetaMask.');
+      return;
+    }
+    setIsEthLogging(true);
+    try {
+      const result = await authenticateWithEthereum();
+      if (!result.success || !result.user) {
+        throw new Error(result.error || 'Ethereum authentication failed');
+      }
+      const userData = {
+        id: result.user.id,
+        verification_level: result.user.verification_level,
+        wallet_address: result.user.wallet_address,
+        created_at: result.user.created_at,
+      };
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('username')
+        .eq('id', result.user.id)
+        .maybeSingle();
+
+      const finishLogin = async (username?: string) => {
+        localStorage.setItem('jc_wallet_address', userData.wallet_address);
+        localStorage.setItem('jc_wallet_type', 'ethereum');
+        const userObj = {
+          id: userData.id,
+          verificationLevel: userData.verification_level as 'device' | 'orb',
+          nullifierHash: `eth_${userData.wallet_address}`,
+          createdAt: userData.created_at,
+          username,
+        };
+        persistUser(userObj);
+        await linkPendingReferralToUser(userObj.id);
+        dispatch({ type: 'SET_USER', payload: userObj });
+        setIsOpen(false);
+      };
+
+      if (existingUser?.username) {
+        await finishLogin(existingUser.username);
+      } else {
+        setPendingUserId(result.user.id);
+        setPendingWalletType('eth');
+        localStorage.setItem('jc_wallet_address', userData.wallet_address);
+        localStorage.setItem('jc_wallet_type', 'ethereum');
+        localStorage.setItem('jc_pending_user_data', JSON.stringify({ ...userData, walletType: 'eth' }));
+        setIsEthLogging(false);
+        setIsOpen(false);
+        setShowUsernamePrompt(true);
+      }
+    } catch (error) {
+      console.error('Ethereum login failed:', error);
+      toast.error(error instanceof Error ? error.message : 'Ethereum login failed');
+    } finally {
+      setIsEthLogging(false);
+    }
+  };
+
+
   return (
     <>
       {showUsernamePrompt && pendingUserId && (
@@ -269,6 +332,23 @@ export const LoginButtons: React.FC<LoginButtonsProps> = ({ compact = false }) =
                 <X className="w-4 h-4 text-muted-foreground" />
               </button>
             </div>
+
+            <Button
+              variant="gold"
+              size="xl"
+              className="w-full bg-gradient-to-r from-[#627EEA] to-[#3C5FE0] hover:from-[#4B6EE0] hover:to-[#2E52D6] text-white border-0"
+              onClick={handleEthLogin}
+              disabled={isEthLogging}
+            >
+              {isEthLogging ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  <EthereumIcon size={20} />
+                  Login with Ethereum
+                </>
+              )}
+            </Button>
 
             <Button
               variant="gold"

@@ -6,6 +6,9 @@ verify_jwt = false
 [functions.verify-wallet]
 verify_jwt = false
 
+[functions.verify-ethereum]
+verify_jwt = false
+
 [functions.sync-questions]
 verify_jwt = false
 
