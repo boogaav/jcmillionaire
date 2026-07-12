@@ -51,7 +51,7 @@ ${PRIZE_LIST}
 Begin now.`;
 }
 
-export const AIPromptHelper: React.FC = () => {
+export const AIPromptHelper: React.FC<AIPromptHelperProps> = ({ onInsert }) => {
   const [open, setOpen] = useState(false);
   const [topic, setTopic] = useState('');
   const [copied, setCopied] = useState(false);
