@@ -16,13 +16,15 @@ type Action =
   | 'reveal_answer'
   | 'show_ladder'
   | 'next_question'
-  | 'end_session';
+  | 'end_session'
+  | 'set_host_choice';
 
 interface Body {
   admin_user_id?: string;
   action?: Action;
   session_id?: string;
   quiz_set_id?: string;
+  choice?: 'A' | 'B' | 'C' | 'D' | null;
 }
 
 function json(status: number, data: unknown) {
