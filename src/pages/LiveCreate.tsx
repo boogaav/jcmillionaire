@@ -64,6 +64,7 @@ export default function LiveCreate() {
   const [editSetId, setEditSetId] = useState<string | null>(null);
   const [editLocked, setEditLocked] = useState(false);
   const [notOwner, setNotOwner] = useState(false);
+  const [imagesOpen, setImagesOpen] = useState(true);
   const hydratedRef = useRef(false);
 
 
