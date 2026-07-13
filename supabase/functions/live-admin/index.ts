@@ -107,6 +107,24 @@ serve(async (req) => {
     if (action === 'start_question') {
       const { error } = await supabase
         .from('live_sessions')
+        .update({ status: 'question', current_question_started_at: new Date().toISOString(), host_selected_choice: null })
+        .eq('id', session_id);
+      if (error) return json(500, { error: error.message });
+      return json(200, { ok: true });
+    }
+
+    if (action === 'set_host_choice') {
+      const choice = body.choice ?? null;
+      if (choice !== null && !['A','B','C','D'].includes(choice)) {
+        return json(400, { error: 'invalid choice' });
+      }
+      const { error } = await supabase
+        .from('live_sessions')
+        .update({ host_selected_choice: choice })
+        .eq('id', session_id);
+      if (error) return json(500, { error: error.message });
+      return json(200, { ok: true });
+    }
         .update({ status: 'question', current_question_started_at: new Date().toISOString() })
         .eq('id', session_id);
       if (error) return json(500, { error: error.message });
