@@ -196,6 +196,7 @@ serve(async (req) => {
           current_question_index: nextIdx,
           status: 'question',
           current_question_started_at: new Date().toISOString(),
+          host_selected_choice: null,
         })
         .eq('id', session_id);
       if (error) return json(500, { error: error.message });
