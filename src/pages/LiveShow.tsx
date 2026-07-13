@@ -526,6 +526,10 @@ function AdminView({ quizSet, session, questions, participants, answers, adminUs
     await invoke('end_session', { session_id: session.id });
     await reload();
   };
+  const setHostChoice = async (choice: 'A' | 'B' | 'C' | 'D' | null) => {
+    if (!session) return;
+    await invoke('set_host_choice', { session_id: session.id, choice });
+  };
 
   if (!session) {
     return (
