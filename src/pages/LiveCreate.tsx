@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Radio, Sparkles, AlertTriangle, Save, Trash2, Lock, Image as ImageIcon, Upload, X } from 'lucide-react';
+import { Radio, Sparkles, AlertTriangle, Save, Trash2, Lock, Image as ImageIcon, Upload, X, ChevronUp, ChevronDown } from 'lucide-react';
 
 import { supabase } from '@/integrations/supabase/client';
 import { useGame } from '@/contexts/GameContext';
