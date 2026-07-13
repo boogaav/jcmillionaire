@@ -125,11 +125,6 @@ serve(async (req) => {
       if (error) return json(500, { error: error.message });
       return json(200, { ok: true });
     }
-        .update({ status: 'question', current_question_started_at: new Date().toISOString() })
-        .eq('id', session_id);
-      if (error) return json(500, { error: error.message });
-      return json(200, { ok: true });
-    }
 
     if (action === 'reveal_answer') {
       const { data: questions } = await supabase
