@@ -568,17 +568,35 @@ function AdminView({ quizSet, session, questions, participants, answers, adminUs
             )}
             <p className="font-semibold">{currentQ.question}</p>
 
+            <p className="text-xs text-muted-foreground">
+              Tap the choice the contestant picked — it will be highlighted on the public screen as their "Final answer".
+            </p>
             <div className="grid grid-cols-2 gap-2 text-sm">
               {CHOICES.map((c) => {
                 const isCorrect = c === currentQ.correct_choice;
+                const hostPicked = session.host_selected_choice === c;
+                const clickable = session.status === 'question';
                 return (
-                  <div key={c} className={cn('p-2 rounded-lg border', isCorrect && 'border-green-500 bg-green-500/10')}>
+                  <button
+                    key={c}
+                    type="button"
+                    disabled={!clickable}
+                    onClick={() => setHostChoice(hostPicked ? null : c)}
+                    className={cn(
+                      'p-2 rounded-lg border text-left transition-all',
+                      isCorrect && 'border-green-500 bg-green-500/10',
+                      hostPicked && 'border-amber-400 bg-amber-400/20 ring-2 ring-amber-400',
+                      clickable ? 'hover:bg-muted cursor-pointer' : 'cursor-default opacity-90',
+                    )}
+                  >
                     <div className="flex items-center justify-between">
-                      <span className="font-bold">{c}. {isCorrect && '✓'}</span>
+                      <span className="font-bold">
+                        {c}. {isCorrect && '✓'} {hostPicked && <span className="text-amber-500">★</span>}
+                      </span>
                       <span className="text-xs text-muted-foreground">{counts[c]}</span>
                     </div>
                     <div className="text-xs">{currentQ[`choice_${c.toLowerCase()}` as 'choice_a']}</div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
