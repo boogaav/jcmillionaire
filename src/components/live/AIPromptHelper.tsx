@@ -20,36 +20,56 @@ const PRIZE_LIST = LIVE_PRIZE_LADDER
 function buildPrompt(topic: string): string {
   const guide = topic.trim() || '<describe your topic, audience, difficulty and tone here>';
   return `You are helping me build a live "Who Wants to Be a Millionaire" style quiz show.
-Please generate exactly 15 multiple-choice questions that progress from very easy (Q1) to extremely hard (Q15).
+Generate EXACTLY 15 multiple-choice questions that progress from very easy (Q1) to extremely hard (Q15).
 
 TOPIC & GUIDANCE FROM THE HOST:
 ${guide}
 
-STRICT OUTPUT FORMAT — output ONLY the questions, nothing else. No intro, no commentary, no markdown fences.
-
-Each question MUST follow this exact block, with a single blank line between blocks:
-
-1. <question text>
-A) <choice A>
-B) <choice B>
-C) <choice C>
-D) <choice D>
-Correct: <A|B|C|D>
-Prize: <number>
-
-Rules:
-- Exactly 15 blocks numbered 1 to 15.
-- Each block has 4 choices A) B) C) D) — one and only one correct answer.
-- "Correct:" must be a single letter A, B, C, or D.
-- "Prize:" is the $JC reward for that question. Use this exact ladder:
+======================================================
+CRITICAL OUTPUT RULES — READ CAREFULLY BEFORE ANSWERING
+======================================================
+1. Output ONLY the 15 question blocks. No intro, no outro, no commentary, no markdown, no code fences, no headings.
+2. Each question block MUST use EXACTLY these 7 lines, in this order, no extra lines inside a block:
+   Line 1: <number>. <question text>
+   Line 2: A) <choice A>
+   Line 3: B) <choice B>
+   Line 4: C) <choice C>
+   Line 5: D) <choice D>
+   Line 6: Correct: <A|B|C|D>
+   Line 7: Prize: <number>
+3. Between every two question blocks there MUST be ONE COMPLETELY BLANK LINE (i.e. two newline characters in a row, "\\n\\n"). Do NOT run blocks together. Do NOT use "---" or any separator — just a blank line.
+4. There must be exactly 15 blocks, numbered 1 through 15, in order.
+5. "Correct:" is a SINGLE uppercase letter A, B, C, or D — never the full answer text.
+6. "Prize:" is the $JC reward for that rung. Use this exact ladder in order:
 ${PRIZE_LIST}
-- Questions 5 and 10 are "safe haven" checkpoints — make them memorable and slightly harder than the surrounding ones.
-- No trick questions, no duplicate answers, no "all of the above".
-- Keep each question under ~200 characters. Keep each choice under ~80 characters.
-- Do NOT wrap the output in code fences or add explanations. Output raw text only.
+7. Questions 5 and 10 are "safe haven" checkpoints — make them memorable and slightly harder than surrounding ones.
+8. No trick questions, no duplicate choices within a question, no "all of the above" / "none of the above".
+9. Keep each question under ~200 characters and each choice under ~80 characters.
+10. Do NOT wrap output in \`\`\` fences. Do NOT add "Here are your questions" or any explanation.
 
-Begin now.`;
+EXAMPLE OF THE REQUIRED SHAPE (2 blocks — you must produce 15):
+
+1. What is the capital of France?
+A) Berlin
+B) Madrid
+C) Paris
+D) Rome
+Correct: C
+Prize: 25
+
+2. Who painted the Mona Lisa?
+A) Van Gogh
+B) Da Vinci
+C) Picasso
+D) Monet
+Correct: B
+Prize: 50
+
+Notice the single blank line between block 1 and block 2. Do the same between all 15 blocks.
+
+Begin now with block 1.`;
 }
+
 
 export const AIPromptHelper: React.FC<AIPromptHelperProps> = ({ onInsert }) => {
   const [open, setOpen] = useState(false);
