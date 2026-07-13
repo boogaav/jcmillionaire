@@ -506,6 +506,7 @@ export type Database = {
           created_by: string | null
           current_question_index: number
           current_question_started_at: string | null
+          host_selected_choice: string | null
           id: string
           is_active: boolean
           quiz_set_id: string | null
@@ -517,6 +518,7 @@ export type Database = {
           created_by?: string | null
           current_question_index?: number
           current_question_started_at?: string | null
+          host_selected_choice?: string | null
           id?: string
           is_active?: boolean
           quiz_set_id?: string | null
@@ -528,6 +530,7 @@ export type Database = {
           created_by?: string | null
           current_question_index?: number
           current_question_started_at?: string | null
+          host_selected_choice?: string | null
           id?: string
           is_active?: boolean
           quiz_set_id?: string | null

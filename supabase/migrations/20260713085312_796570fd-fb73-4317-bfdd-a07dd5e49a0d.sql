@@ -1,0 +1,1 @@
+ALTER TABLE public.live_sessions ADD COLUMN IF NOT EXISTS host_selected_choice TEXT CHECK (host_selected_choice IN ('A','B','C','D'));
