@@ -370,9 +370,22 @@ export default function LiveCreate() {
 
         {parsed.questions.length > 0 && (
           <Card className="p-4 space-y-3">
-            <div className="flex items-center gap-2">
-              <ImageIcon className="w-4 h-4 text-primary" />
-              <label className="text-sm font-semibold">Question images (optional)</label>
+          <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <ImageIcon className="w-4 h-4 text-primary" />
+                <label className="text-sm font-semibold">Question images (optional)</label>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 gap-1 px-2"
+                onClick={() => setImagesOpen((v) => !v)}
+                aria-expanded={imagesOpen}
+              >
+                {imagesOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                {imagesOpen ? 'Hide' : 'Show'}
+              </Button>
             </div>
             <p className="text-xs text-muted-foreground">
               Upload a picture or paste an image URL to show above the question during the live show.
