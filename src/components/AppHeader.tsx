@@ -14,11 +14,6 @@ const XIcon = () => (
   </svg>
 );
 
-const PumpFunIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current" aria-label="Pump.fun">
-    <path d="M16.94 3.06a5.25 5.25 0 0 1 0 7.43l-1.06 1.06-7.43-7.43 1.06-1.06a5.25 5.25 0 0 1 7.43 0zM7.43 4.84l11.73 11.73-2.59 2.59a5.25 5.25 0 1 1-7.43-7.43l1.06-1.06-4.3-4.3a1.5 1.5 0 0 1 0-2.12 1.5 1.5 0 0 1 1.53-.41z" />
-  </svg>
-);
 
 const AppHeader: React.FC = () => {
   const { state, dispatch } = useGame();
@@ -40,20 +35,9 @@ const AppHeader: React.FC = () => {
 
         <div className="flex items-center gap-3">
           {!inWorldApp && (
-            <>
-              <a
-                href="https://pump.fun/coin/BTfxgSELtGJmWcjePoKwQuoFhSUYCxhkGv2VpcYBpump"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-primary transition-colors"
-              >
-                <PumpFunIcon />
-                <span>Trade $JC</span>
-              </a>
-              <a href="https://x.com/iamjackiechain" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
-                <XIcon />
-              </a>
-            </>
+            <a href="https://x.com/iamjackiechain" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+              <XIcon />
+            </a>
           )}
 
           {!isVerified ? (
