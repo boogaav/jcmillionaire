@@ -79,11 +79,23 @@ export function cleanAIResponse(text: string): string {
 
 export function parseLadder(text: string): ParseResult {
   const errors: string[] = [];
+  const cleaned = cleanAIResponse(text);
   // Split into blocks on blank lines
-  const blocks = cleanAIResponse(text)
+  let blocks = cleaned
     .split(/\n\s*\n/)
     .map((b) => b.trim())
     .filter(Boolean);
+
+  // Fallback: if the AI forgot blank lines, split before each numbered question header
+  // (e.g. "2." / "Q2:" / "Question 2)") that appears on its own line.
+  if (blocks.length < 15) {
+    const alt = cleaned
+      .split(/\n(?=\s*(?:q(?:uestion)?\s*)?\d{1,2}\s*[.:)\-]\s)/i)
+      .map((b) => b.trim())
+      .filter(Boolean);
+    if (alt.length > blocks.length) blocks = alt;
+  }
+
 
   const questions: ParsedLadderQuestion[] = [];
 
