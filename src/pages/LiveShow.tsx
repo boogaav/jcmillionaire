@@ -363,8 +363,9 @@ function PlayerView({ role, session, questions, participants, answers, userId }:
         {CHOICES.map((c) => {
           const choiceText = currentQ[`choice_${c.toLowerCase()}` as 'choice_a'];
           const selected = myAnswer?.choice === c;
+          const hostPicked = session.host_selected_choice === c;
           const isCorrect = showReveal && c === currentQ.correct_choice;
-          const isWrong = showReveal && selected && c !== currentQ.correct_choice;
+          const isWrong = showReveal && (selected || hostPicked) && c !== currentQ.correct_choice;
           const pct = Math.round((counts[c] / totalCount) * 100);
           const disabled = role === 'spectator' || showReveal || !!myAnswer;
           return (
@@ -376,14 +377,18 @@ function PlayerView({ role, session, questions, participants, answers, userId }:
                 'relative overflow-hidden rounded-2xl p-4 text-left font-semibold shadow-lg transition-all',
                 CHOICE_COLORS[c],
                 selected && !showReveal && 'ring-4 ring-white/60',
+                hostPicked && !showReveal && 'ring-4 ring-amber-300 scale-[1.03] animate-pulse',
                 isCorrect && 'ring-4 ring-white scale-105',
                 isWrong && 'opacity-50',
-                disabled && !showReveal && 'opacity-60 cursor-not-allowed',
+                disabled && !showReveal && !hostPicked && 'opacity-60 cursor-not-allowed',
               )}
             >
               <div className="flex items-start gap-3">
                 <span className="flex-shrink-0 w-8 h-8 rounded-full bg-white/25 flex items-center justify-center font-bold">{c}</span>
                 <span className="flex-1">{choiceText}</span>
+                {hostPicked && !showReveal && (
+                  <span className="text-xs font-bold uppercase bg-amber-300 text-black px-2 py-0.5 rounded-full">Final answer</span>
+                )}
                 {isCorrect && <Check className="w-6 h-6" />}
                 {isWrong && <X className="w-6 h-6" />}
               </div>
