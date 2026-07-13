@@ -34,6 +34,7 @@ interface LiveSession {
   status: SessionStatus;
   current_question_index: number;
   is_active: boolean;
+  host_selected_choice: 'A' | 'B' | 'C' | 'D' | null;
 }
 interface LiveQuestion {
   id: string; quiz_set_id: string; order_index: number;
