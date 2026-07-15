@@ -131,7 +131,7 @@ const Game: React.FC = () => {
       setCorrectAnswersMap(correctAnswers);
       setCurrentQuestion(loadedQuestions[0]);
       setQuestionsLoaded(true);
-      console.log(`Loaded ${loadedQuestions.length} unseen questions for session`);
+      import.meta.env.DEV && console.log(`Loaded ${loadedQuestions.length} unseen questions for session`);
     };
 
     loadQuestions();
@@ -157,7 +157,7 @@ const Game: React.FC = () => {
 
       // Check if user has remaining attempts
       if (attempts.remaining <= 0) {
-        console.log('No attempts remaining, blocking game');
+        import.meta.env.DEV && console.log('No attempts remaining, blocking game');
         setHasPlayedToday(true);
         setIsInitializing(false);
         hasInitializedRef.current = true;
@@ -188,7 +188,7 @@ const Game: React.FC = () => {
         if (error) {
           console.error('Failed to create run:', error);
         } else if (run) {
-          console.log('Created run:', run.id);
+          import.meta.env.DEV && console.log('Created run:', run.id);
           setCurrentRun(run);
         }
       } catch (err) {

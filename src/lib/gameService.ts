@@ -223,7 +223,7 @@ async function updateReferralOnFirstRun(userId: string): Promise<void> {
       if (updateError) {
         console.error('Error updating referral status:', updateError);
       } else {
-        console.log('Referral marked as first_run_completed, inviter will receive bonus attempt');
+        import.meta.env.DEV && console.log('Referral marked as first_run_completed, inviter will receive bonus attempt');
       }
     }
   } catch (err) {
@@ -444,7 +444,7 @@ export async function fetchUserQuestions(userId: string, language: Language = 'e
     correctAnswers[q.id] = q.correct_choice as 'A' | 'B' | 'C' | 'D';
   });
 
-  console.log(`Loaded ${questions.length} unseen questions for user ${userId} in ${language} (wallet: ${walletType}, ${answeredIds.size} already answered)`);
+  import.meta.env.DEV && console.log(`Loaded ${questions.length} unseen questions for user ${userId} in ${language} (wallet: ${walletType}, ${answeredIds.size} already answered)`);
   return { questions, correctAnswers, error: null };
 }
 

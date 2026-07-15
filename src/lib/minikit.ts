@@ -99,7 +99,7 @@ export async function getUserInfoByAddress(address: string): Promise<WorldIdUser
       profilePictureUrl: userInfo?.profilePictureUrl,
     };
   } catch (error) {
-    console.log('Could not get user info by address:', error);
+    import.meta.env.DEV && console.log('Could not get user info by address:', error);
     return null;
   }
 }
@@ -137,7 +137,7 @@ export async function authenticateWithWallet(
 
   try {
     const nonce = await generateNonce();
-    console.log('Starting wallet auth with nonce:', nonce);
+    import.meta.env.DEV && console.log('Starting wallet auth with nonce:', nonce);
 
     // Request wallet authentication
     const { finalPayload } = await MiniKit.commandsAsync.walletAuth({
@@ -147,7 +147,7 @@ export async function authenticateWithWallet(
       statement: 'Sign in to Jackie Chain: Millionaire to verify your identity and claim tokens.',
     });
 
-    console.log('Wallet auth response:', finalPayload);
+    import.meta.env.DEV && console.log('Wallet auth response:', finalPayload);
 
     if (finalPayload.status === 'error') {
       return {
@@ -177,7 +177,7 @@ export async function authenticateWithWallet(
         }
       }
     } catch (e) {
-      console.log('Could not fetch World ID user info before verification:', e);
+      import.meta.env.DEV && console.log('Could not fetch World ID user info before verification:', e);
     }
 
     // Verify with backend and pass World ID info
@@ -200,7 +200,7 @@ export async function authenticateWithWallet(
       return { success: false, error: data.error || 'Verification failed' };
     }
     
-    console.log('Wallet auth successful:', data.user);
+    import.meta.env.DEV && console.log('Wallet auth successful:', data.user);
     return {
       success: true,
       user: {

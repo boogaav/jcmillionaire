@@ -112,7 +112,7 @@ export const ReferralDashboard: React.FC<ReferralDashboardProps> = ({ userId, in
           filter: `inviter_user_id=eq.${userId}`,
         },
         (payload) => {
-          console.log('Referral update:', payload);
+          import.meta.env.DEV && console.log('Referral update:', payload);
           // Refetch to get updated data with usernames
           fetchReferrals();
         }

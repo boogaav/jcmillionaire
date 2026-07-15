@@ -24,7 +24,7 @@ export async function createOrGetUser(
     }
 
     if (existingUser) {
-      console.log('Found existing user:', existingUser.id);
+      import.meta.env.DEV && console.log('Found existing user:', existingUser.id);
       const user: User = {
         id: existingUser.id,
         nullifierHash: existingUser.nullifier_hash,
@@ -55,7 +55,7 @@ export async function createOrGetUser(
       return { user: null, error: insertError.message };
     }
 
-    console.log('Created new user:', newUser.id);
+    import.meta.env.DEV && console.log('Created new user:', newUser.id);
     const user: User = {
       id: newUser.id,
       nullifierHash: newUser.nullifier_hash,
@@ -153,7 +153,7 @@ export async function loadStoredUser(): Promise<{ user: User | null; error: stri
   
   // If user not found in database, clear the stale localStorage entry
   if (!result.user) {
-    console.log('Stored user not found in database, clearing localStorage');
+    import.meta.env.DEV && console.log('Stored user not found in database, clearing localStorage');
     clearStoredUser();
   }
   

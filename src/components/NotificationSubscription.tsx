@@ -35,7 +35,7 @@ export const NotificationSubscription: React.FC<NotificationSubscriptionProps> =
       // Use the async command API with proper typing
       const { finalPayload } = await MiniKit.commandsAsync.requestPermission(requestPermissionPayload);
 
-      console.log('Permission response:', finalPayload);
+      import.meta.env.DEV && console.log('Permission response:', finalPayload);
 
       if (finalPayload.status === 'success') {
         setStatus('granted');

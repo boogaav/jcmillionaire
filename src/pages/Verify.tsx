@@ -36,7 +36,7 @@ const Verify: React.FC = () => {
     const checkEnv = setTimeout(() => {
       const isInstalled = isInWorldApp();
       const hasPhantom = isPhantomAvailable();
-      console.log('World App check:', isInstalled, 'Phantom check:', hasPhantom);
+      import.meta.env.DEV && console.log('World App check:', isInstalled, 'Phantom check:', hasPhantom);
       setInWorldApp(isInstalled);
       setPhantomAvailable(hasPhantom);
       setIsCheckingEnv(false);
@@ -70,12 +70,12 @@ const Verify: React.FC = () => {
     // Persist user to localStorage
     persistUser(userObj);
     
-    console.log('User verified:', userObj.id, 'wallet type:', walletType);
+    import.meta.env.DEV && console.log('User verified:', userObj.id, 'wallet type:', walletType);
     
     // Link pending referral if exists
     const wasLinked = await linkPendingReferralToUser(userObj.id);
     if (wasLinked) {
-      console.log('Referral linked successfully');
+      import.meta.env.DEV && console.log('Referral linked successfully');
     }
     
     dispatch({ type: 'SET_USER', payload: userObj });
@@ -106,7 +106,7 @@ const Verify: React.FC = () => {
     setVerifyingWith('world');
     
     try {
-      console.log('Authenticating with World App wallet...');
+      import.meta.env.DEV && console.log('Authenticating with World App wallet...');
       const result = await authenticateWithWallet(verificationLevel);
       
       if (!result.success || !result.user) {
@@ -140,7 +140,7 @@ const Verify: React.FC = () => {
     setVerifyingWith('phantom');
     
     try {
-      console.log('Authenticating with Phantom wallet...');
+      import.meta.env.DEV && console.log('Authenticating with Phantom wallet...');
       const result = await authenticateWithPhantom();
       
       if (!result.success || !result.user) {
