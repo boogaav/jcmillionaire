@@ -111,7 +111,7 @@ const Profile: React.FC = () => {
               .eq('id', user.id);
           }
         } catch (e) {
-          console.log('Could not fetch World ID profile:', e);
+          import.meta.env.DEV && console.log('Could not fetch World ID profile:', e);
         }
       }
     };

@@ -49,10 +49,10 @@ export async function authenticateWithPhantom(): Promise<{
     }
 
     // Connect to Phantom
-    console.log('Connecting to Phantom wallet...');
+    import.meta.env.DEV && console.log('Connecting to Phantom wallet...');
     const resp = await provider.connect();
     const publicKey = resp.publicKey.toString();
-    console.log('Connected to Phantom, public key:', publicKey);
+    import.meta.env.DEV && console.log('Connected to Phantom, public key:', publicKey);
 
     // Fetch server-generated nonce
     const nonce = await fetchNonce();
@@ -60,10 +60,10 @@ export async function authenticateWithPhantom(): Promise<{
     const encodedMessage = new TextEncoder().encode(message);
 
     // Request signature
-    console.log('Requesting signature...');
+    import.meta.env.DEV && console.log('Requesting signature...');
     const signedMessage = await provider.signMessage(encodedMessage, 'utf8');
     const signature = bs58.encode(signedMessage.signature);
-    console.log('Message signed successfully');
+    import.meta.env.DEV && console.log('Message signed successfully');
 
     // Verify with backend
     const { data, error } = await supabase.functions.invoke('verify-phantom', {

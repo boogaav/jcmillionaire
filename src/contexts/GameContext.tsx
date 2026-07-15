@@ -94,7 +94,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       }
       
       setIsAdmin(!!data);
-      console.log('Admin status:', !!data);
+      import.meta.env.DEV && console.log('Admin status:', !!data);
     } catch (err) {
       console.error('Error in checkAdminStatus:', err);
       setIsAdmin(false);
@@ -222,7 +222,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       // Try to restore user from localStorage
       const { user } = await loadStoredUser();
       if (user) {
-        console.log('Restored user session:', user.id);
+        import.meta.env.DEV && console.log('Restored user session:', user.id);
         dispatch({ type: 'SET_USER', payload: user });
       }
       
@@ -247,7 +247,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           filter: `day_id=eq.${today}`,
         },
         (payload) => {
-          console.log('Day state update received:', payload);
+          import.meta.env.DEV && console.log('Day state update received:', payload);
           if (payload.new && typeof payload.new === 'object' && 'day_id' in payload.new) {
             const data = payload.new as {
               day_id: string;

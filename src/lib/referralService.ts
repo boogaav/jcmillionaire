@@ -129,7 +129,7 @@ export async function redeemReferralCode(
     // - +1 to inviter when status becomes 'first_run_completed'
     // No need to call grantExtraLife here as it would cause double-granting
 
-    console.log('Referral redeemed successfully:', { inviterId: inviter.id, invitedUserId });
+    import.meta.env.DEV && console.log('Referral redeemed successfully:', { inviterId: inviter.id, invitedUserId });
     return { success: true, error: null };
   } catch (err) {
     console.error('Error in redeemReferralCode:', err);
@@ -186,7 +186,7 @@ async function grantExtraLife(userId: string, dayId: string): Promise<void> {
       }
     }
 
-    console.log('Extra life granted to:', userId);
+    import.meta.env.DEV && console.log('Extra life granted to:', userId);
   } catch (err) {
     console.error('Error granting extra life:', err);
   }

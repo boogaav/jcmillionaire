@@ -41,7 +41,7 @@ export async function linkPendingReferralToUser(userId: string): Promise<boolean
   try {
     // Don't allow self-referral
     if (pending.inviterUserId === userId) {
-      console.log('Self-referral prevented');
+      import.meta.env.DEV && console.log('Self-referral prevented');
       clearPendingReferral();
       return false;
     }
@@ -54,7 +54,7 @@ export async function linkPendingReferralToUser(userId: string): Promise<boolean
       .maybeSingle();
 
     if (existingReferral) {
-      console.log('User already has a referral');
+      import.meta.env.DEV && console.log('User already has a referral');
       clearPendingReferral();
       return false;
     }
@@ -73,7 +73,7 @@ export async function linkPendingReferralToUser(userId: string): Promise<boolean
       return false;
     }
 
-    console.log('Referral linked to user:', { referralId: pending.referralId, userId });
+    import.meta.env.DEV && console.log('Referral linked to user:', { referralId: pending.referralId, userId });
     return true;
     
   } catch (error) {

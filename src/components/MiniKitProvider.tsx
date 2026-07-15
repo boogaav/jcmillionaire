@@ -10,7 +10,7 @@ export const MiniKitProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // Install MiniKit with app_id so World ID popup shows "Jackie Chain"
     const installed = ensureMiniKitInstalled();
-    console.log('MiniKit installed with app_id:', APP_ID, 'isInstalled:', installed, 'inWorldApp:', isInWorldApp());
+    import.meta.env.DEV && console.log('MiniKit installed with app_id:', APP_ID, 'isInstalled:', installed, 'inWorldApp:', isInWorldApp());
   }, []);
 
   return <>{children}</>;

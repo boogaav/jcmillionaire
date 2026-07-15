@@ -83,7 +83,7 @@ export const ReferralTrackerInner: React.FC = () => {
         // Check if user already has a stored user (already played)
         const storedUser = localStorage.getItem('jc_user');
         if (storedUser) {
-          console.log('User already has an account, referral cannot be applied');
+          import.meta.env.DEV && console.log('User already has an account, referral cannot be applied');
           await logFailure('already_played');
           setReferralStatus('already_played');
           searchParams.delete('ref');
@@ -98,7 +98,7 @@ export const ReferralTrackerInner: React.FC = () => {
           try {
             const parsed = JSON.parse(existingReferral) as PendingReferral;
             if (parsed.code === normalizedCode) {
-              console.log('Referral already tracked:', normalizedCode);
+              import.meta.env.DEV && console.log('Referral already tracked:', normalizedCode);
               setReferralStatus('already_tracked');
               searchParams.delete('ref');
               setSearchParams(searchParams, { replace: true });
@@ -152,7 +152,7 @@ export const ReferralTrackerInner: React.FC = () => {
         }
 
         if (!inviter) {
-          console.log('Invalid referral code:', normalizedCode);
+          import.meta.env.DEV && console.log('Invalid referral code:', normalizedCode);
           await logFailure('invalid_code');
           setReferralStatus('invalid_code');
           searchParams.delete('ref');
@@ -192,7 +192,7 @@ export const ReferralTrackerInner: React.FC = () => {
         localStorage.setItem(REFERRAL_STORAGE_KEY, JSON.stringify(pending));
         setReferralStatus('new_referral');
         
-        console.log('Referral click tracked:', { code: normalizedCode, referralId: referral.id });
+        import.meta.env.DEV && console.log('Referral click tracked:', { code: normalizedCode, referralId: referral.id });
 
         // Clear the URL param
         searchParams.delete('ref');
