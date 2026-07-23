@@ -64,7 +64,7 @@ const AppContent = () => {
       
       <ReferralTracker />
       <Routes>
-        <Route path="/" element={<Live />} />
+        <Route path="/" element={<About />} />
         <Route path="/about" element={<About />} />
         <Route path="/verify" element={<Verify />} />
         <Route path="/game" element={<Home />} />
